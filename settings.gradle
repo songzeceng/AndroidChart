@@ -1,0 +1,3 @@
+include ':SmartChart'
+include ':app'
+rootProject.name = "TestApplication"
