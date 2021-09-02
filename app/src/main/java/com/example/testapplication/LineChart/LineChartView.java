@@ -7,12 +7,15 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.os.Build;
 import android.util.AttributeSet;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 
+import com.example.testapplication.interfaces.IChart;
 import com.example.testapplication.utils.Utils;
 
 import java.text.SimpleDateFormat;
@@ -27,7 +30,7 @@ import java.util.Locale;
  * Created by jeanboy on 2017/6/12.
  */
 
-public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callback {
+public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callback, IChart {
 
     private Paint linePaint;//曲线画笔
     private Paint pointPaint;//曲线上锚点画笔
@@ -87,7 +90,20 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
         public void run() {
             try {
                 while (mRunning) {
-                    draw();
+                    Canvas canvas;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        canvas = mHolder.getSurface().lockHardwareCanvas();
+                    } else {
+                        canvas = mHolder.lockCanvas();
+                    }
+
+                    drawCanvas(canvas);
+
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        mHolder.getSurface().unlockCanvasAndPost(canvas);
+                    } else {
+                        mHolder.unlockCanvasAndPost(canvas);
+                    }
                     Thread.sleep(Utils.sINTERVAL_UPDATE_CHART);
                 }
             } catch (Exception e) {
@@ -197,17 +213,7 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
 //        draw();
     }
 
-    private void draw() {
-        Canvas canvas = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            canvas = mHolder.getSurface().lockHardwareCanvas();
-        } else {
-            canvas = mHolder.lockCanvas();
-        }
-
-        if (mCanvas == null) {
-            mCanvas = canvas;
-        }
+    private void drawCanvas(Canvas canvas) {
         canvas.drawColor(Color.TRANSPARENT);//绘制背景颜色
         canvas.translate(0f, mHeight / 2f + (getViewDrawHeight() + topSpace + bottomSpace) / 2f);//设置画布中心点垂直居中
 
@@ -218,12 +224,6 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
         drawTable(canvas);//绘制表格
         drawLine(canvas);//绘制曲线
         drawLinePoints(canvas);//绘制曲线上的点
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            mHolder.getSurface().unlockCanvasAndPost(canvas);
-        } else {
-            mHolder.unlockCanvasAndPost(canvas);
-        }
     }
 
     private void drawText(Canvas canvas, Paint textPaint, String text, float x, float y) {
@@ -616,6 +616,15 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
     public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
         mRunning = false;
         mDrawThread.interrupt();
+    }
+
+    @Override
+    public void draw(Surface surface) {
+        if (surface == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return;
+        }
+
+        drawCanvas(surface.lockHardwareCanvas());
     }
 
     public static class Data<T> {

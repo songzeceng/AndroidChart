@@ -5,6 +5,8 @@ import android.os.Message;
 
 import androidx.annotation.NonNull;
 
+import com.example.testapplication.interfaces.IHandler;
+
 import java.lang.ref.WeakReference;
 
 public class WeakHandler extends Handler {

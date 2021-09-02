@@ -1,4 +1,4 @@
-package com.example.testapplication;
+package com.example.testapplication.interfaces;
 
 import android.os.Message;
 

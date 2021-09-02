@@ -18,6 +18,10 @@ public class Utils {
     public static final int sTYPE_NETWORK_STATUS = 7;
     public static final int sTYPE_CPU_SPEED = 8;
 
+    public static final int sTYPE_CHART_LINE = 0;
+    public static final int sTYPE_CHART_BAR = 1;
+    public static final int sTYPE_CHART_PIE = 2;
+
     public static int dip2px(Context context, float dipValue) {
         if (context == null) {
             throw new IllegalArgumentException("Context cannot be null!");

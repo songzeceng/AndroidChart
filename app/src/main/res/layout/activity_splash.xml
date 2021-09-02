@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainActivity"
-    android:paddingVertical="100dp">
+    android:paddingVertical="50dp">
 
     <Button
         android:id="@+id/btn_line"
@@ -25,5 +25,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="饼图"/>
+
+    <Button
+        android:id="@+id/btn_multi_process"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="子进程"/>
+
+    <SurfaceView
+        android:id="@+id/surface_multi_process"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="500dp"/>
 
 </LinearLayout>

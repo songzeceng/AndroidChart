@@ -8,12 +8,14 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.testapplication.interfaces.IChart;
 import com.example.testapplication.utils.Utils;
 
 import java.text.SimpleDateFormat;
@@ -22,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class BarChartView extends SurfaceView implements SurfaceHolder.Callback {
+public class BarChartView extends SurfaceView implements SurfaceHolder.Callback, IChart {
     private int defaultLineColor = Color.parseColor("#FF4081");
     private int defaultBorderColor = Color.parseColor("#BBBBBB");
     private int titleTextColor = Color.argb(255, 217, 217, 217);
@@ -68,7 +70,21 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
         public void run() {
             try {
                 while (mRunning) {
-                    draw();
+                    Canvas canvas;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        canvas = mHolder.getSurface().lockHardwareCanvas();
+                    } else {
+                        canvas = mHolder.lockCanvas();
+                    }
+
+                    drawCanvas(canvas);
+
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        mHolder.getSurface().unlockCanvasAndPost(canvas);
+                    } else {
+                        mHolder.unlockCanvasAndPost(canvas);
+                    }
+
                     Thread.sleep(Utils.sINTERVAL_UPDATE_CHART);
                 }
             } catch (Exception e) {
@@ -178,14 +194,7 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
 //        draw();
     }
 
-    private void draw() {
-        Canvas canvas = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            canvas = mHolder.getSurface().lockHardwareCanvas();
-        } else {
-            canvas = mHolder.lockCanvas();
-        }
-
+    private void drawCanvas(Canvas canvas) {
         double max = Math.ceil(maxData);
         double min = Math.floor(minData);
         double totalDiff = maxData - minData;
@@ -229,12 +238,6 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
                     x - mTextPaint.measureText(mSimpleDateFormat.format(data.time)) / 2,
                     descriptionTextSize,
                     mTextPaint);
-        }
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            mHolder.getSurface().unlockCanvasAndPost(canvas);
-        } else {
-            mHolder.unlockCanvasAndPost(canvas);
         }
     }
 
@@ -288,7 +291,16 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
         mDrawThread.interrupt();
     }
 
-    static class Data {
+    @Override
+    public void draw(Surface surface) {
+        if (surface == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return;
+        }
+
+        drawCanvas(surface.lockHardwareCanvas());
+    }
+
+    public static class Data {
         double value;
         Date time;
 

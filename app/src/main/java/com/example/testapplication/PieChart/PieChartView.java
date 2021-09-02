@@ -6,13 +6,16 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 
+import com.example.testapplication.interfaces.IChart;
 import com.example.testapplication.utils.Utils;
 
 import java.text.SimpleDateFormat;
@@ -23,7 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-public class PieChartView extends SurfaceView implements SurfaceHolder.Callback {
+public class PieChartView extends SurfaceView implements SurfaceHolder.Callback, IChart {
     private static final HashMap<Integer, Integer> sALL_COLORS = new HashMap<>();
     private float mRadius;
     private Random mRandom = new Random();
@@ -52,7 +55,20 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback 
         public void run() {
             try {
                 while (mRunning) {
-                    draw();
+                    Canvas canvas;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        canvas = mHolder.getSurface().lockHardwareCanvas();
+                    } else {
+                        canvas = mHolder.lockCanvas();
+                    }
+
+                    drawCanvas(canvas);
+
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        mHolder.getSurface().unlockCanvasAndPost(canvas);
+                    } else {
+                        mHolder.unlockCanvasAndPost(canvas);
+                    }
                     Thread.sleep(Utils.sINTERVAL_UPDATE_PIE);
                 }
             } catch (Exception e) {
@@ -145,22 +161,9 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback 
 //        draw();
     }
 
-    private void draw() {
-        Canvas canvas = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            canvas = mHolder.getSurface().lockHardwareCanvas();
-        } else {
-            canvas = mHolder.lockCanvas();
-        }
-
+    private void drawCanvas(Canvas canvas) {
         drawDescription(canvas);
         drawArc(canvas);
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            mHolder.getSurface().unlockCanvasAndPost(canvas);
-        } else {
-            mHolder.unlockCanvasAndPost(canvas);
-        }
     }
 
     private void drawArc(Canvas canvas) {
@@ -355,7 +358,16 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback 
         mDrawThread.interrupt();
     }
 
-    static class Data {
+    @Override
+    public void draw(Surface surface) {
+        if (surface == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return;
+        }
+
+        drawCanvas(surface.lockHardwareCanvas());
+    }
+
+    public static class Data {
         double value; // frequency value
         Date time;
         int color;

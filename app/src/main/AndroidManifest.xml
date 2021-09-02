@@ -20,6 +20,11 @@
         <activity android:name=".LineChart.LineChartActivity"/>
         <activity android:name=".BarChart.BarActivity"/>
         <activity android:name=".PieChart.PieChartActivity"/>
+
+        <service android:name=".service.ChartDrawService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":drawChart"/>
     </application>
 
 </manifest>
