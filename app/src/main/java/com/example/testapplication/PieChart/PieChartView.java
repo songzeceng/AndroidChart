@@ -5,13 +5,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 
@@ -55,7 +53,7 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback 
             try {
                 while (mRunning) {
                     draw();
-                    Thread.sleep(30);
+                    Thread.sleep(Utils.sINTERVAL_UPDATE_PIE);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -148,14 +146,21 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback 
     }
 
     private void draw() {
-        Canvas canvas = mHolder.lockCanvas();
-
-        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR); // 饼图和折线图或条形图不同，它每次绘图前必须清空已有图形
+        Canvas canvas = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            canvas = mHolder.getSurface().lockHardwareCanvas();
+        } else {
+            canvas = mHolder.lockCanvas();
+        }
 
         drawDescription(canvas);
         drawArc(canvas);
 
-        mHolder.unlockCanvasAndPost(canvas);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            mHolder.getSurface().unlockCanvasAndPost(canvas);
+        } else {
+            mHolder.unlockCanvasAndPost(canvas);
+        }
     }
 
     private void drawArc(Canvas canvas) {

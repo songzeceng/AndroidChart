@@ -7,29 +7,19 @@ import android.os.Message;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 
-import com.daivd.chart.core.PieChart;
 import com.example.testapplication.IHandler;
 import com.example.testapplication.R;
 import com.example.testapplication.WeakHandler;
+import com.example.testapplication.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-public class PieChartActivity extends Activity implements View.OnClickListener, IHandler {
-    private static final int sINIT_DATA_COUNT = 10;
-    private static final int sTYPE_MEMORY = 0;
-    private static final int sTYPE_FPS = 1;
-    private static final int sTYPE_CPU = 2;
-    private static final int sTYPE_UI = 3;
-    private static final int sTYPE_GPU = 4;
-    private static final int sTYPE_TEMPERATURE = 5;
-    private static final int sTYPE_CURRENT = 6;
-    private static final int sTYPE_NETWORK_STATUS = 7;
-    private static final int sTYPE_CPU_SPEED = 8;
+import static com.example.testapplication.utils.Utils.*;
 
-    private static final int sINTERVAL_UPDATE = 1000;
+public class PieChartActivity extends Activity implements View.OnClickListener, IHandler {
 
     PieChartView mPieChartView;
     private HorizontalScrollView mScrollContainer;
@@ -132,7 +122,7 @@ public class PieChartActivity extends Activity implements View.OnClickListener, 
         }
 
         mPieChartView.setData(mData);
-        mHandler.sendEmptyMessageDelayed(type, sINTERVAL_UPDATE);
+        mHandler.sendEmptyMessageDelayed(type, Utils.sINTERVAL_UPDATE_DATA);
     }
 
     @Override
@@ -192,7 +182,7 @@ public class PieChartActivity extends Activity implements View.OnClickListener, 
 //                mPieChartView.appendData(new PieChartView.Data(mRandom.nextDouble() * 5, new Date()));
 //                break;
         }
-        mHandler.sendEmptyMessageDelayed(msg.what, sINTERVAL_UPDATE);
+        mHandler.sendEmptyMessageDelayed(msg.what, Utils.sINTERVAL_UPDATE_DATA);
     }
 
     @SuppressLint("NonConstantResourceId")

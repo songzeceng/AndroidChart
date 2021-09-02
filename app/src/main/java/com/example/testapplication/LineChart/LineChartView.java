@@ -10,7 +10,6 @@ import android.graphics.Point;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 
@@ -89,7 +88,7 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
             try {
                 while (mRunning) {
                     draw();
-                    Thread.sleep(30);
+                    Thread.sleep(Utils.sINTERVAL_UPDATE_CHART);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -199,7 +198,12 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
     }
 
     private void draw() {
-        Canvas canvas = mHolder.lockCanvas();
+        Canvas canvas = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            canvas = mHolder.getSurface().lockHardwareCanvas();
+        } else {
+            canvas = mHolder.lockCanvas();
+        }
 
         if (mCanvas == null) {
             mCanvas = canvas;
@@ -215,7 +219,11 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
         drawLine(canvas);//绘制曲线
         drawLinePoints(canvas);//绘制曲线上的点
 
-        mHolder.unlockCanvasAndPost(canvas);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            mHolder.getSurface().unlockCanvasAndPost(canvas);
+        } else {
+            mHolder.unlockCanvasAndPost(canvas);
+        }
     }
 
     private void drawText(Canvas canvas, Paint textPaint, String text, float x, float y) {

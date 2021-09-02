@@ -10,7 +10,6 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -70,7 +69,7 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
             try {
                 while (mRunning) {
                     draw();
-                    Thread.sleep(30);
+                    Thread.sleep(Utils.sINTERVAL_UPDATE_CHART);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -180,7 +179,12 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
     }
 
     private void draw() {
-        Canvas canvas = mHolder.lockCanvas();
+        Canvas canvas = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            canvas = mHolder.getSurface().lockHardwareCanvas();
+        } else {
+            canvas = mHolder.lockCanvas();
+        }
 
         double max = Math.ceil(maxData);
         double min = Math.floor(minData);
@@ -227,7 +231,11 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
                     mTextPaint);
         }
 
-        mHolder.unlockCanvasAndPost(canvas);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            mHolder.getSurface().unlockCanvasAndPost(canvas);
+        } else {
+            mHolder.unlockCanvasAndPost(canvas);
+        }
     }
 
     private void resetParam() {
