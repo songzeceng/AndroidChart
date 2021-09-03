@@ -7,6 +7,7 @@ import com.example.testapplication.LineChart.LineChartView;
 import com.example.testapplication.PieChart.PieChartView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -119,7 +120,7 @@ public class DataHelper {
                         int index = mRandom.nextInt(10);
                         mNetworkStatusFakeDataForPie[index]++; // [-2, 9)
                         PieChartView.Data.addData(mPieData,
-                                new PieChartView.Data(mNetworkStatusFakeData[index], new Date(), String.valueOf(index)));
+                                new PieChartView.Data(mNetworkStatusFakeData[index], String.valueOf(index)));
                     }
                     break;
 //            case sTYPE_CPU_SPEED:
@@ -193,11 +194,292 @@ public class DataHelper {
         }
     }
 
+    public void initRawDataForBar(double[] data, int type) {
+        if (Utils.arrayEmpty(data)) {
+            throw new IllegalArgumentException("Data to be initialized must not be empty.");
+        }
+
+        mRandom.setSeed(System.currentTimeMillis());
+
+        switch (type) {
+            case sTYPE_MEMORY:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextInt(200) + 900; // [900, 1100)
+                }
+                break;
+            case sTYPE_FPS:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextInt(80) + 20; // [20, 100)
+                }
+                break;
+            case sTYPE_CPU:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextDouble(); // [0, 1)
+                }
+                break;
+            case sTYPE_UI:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextInt(400) + 600; // [400, 1000)
+                }
+                break;
+            case sTYPE_GPU:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextDouble() * 6 - 1; // [-1, 5)
+                }
+                break;
+            case sTYPE_TEMPERATURE:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextInt(25) + 10; // [25, 35)
+                }
+                break;
+            case sTYPE_CURRENT:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextDouble() * 3 - 1; // [-1, 2)
+                }
+                break;
+            case sTYPE_NETWORK_STATUS:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextInt(11) - 2; // [-2, 9)
+                }
+                break;
+            case sTYPE_CPU_SPEED:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextDouble() * 5; // [0, 5)
+                }
+                break;
+        }
+    }
+
+    public double initRawDataForLine(double[] data, int type) {
+        if (Utils.arrayEmpty(data)) {
+            throw new IllegalArgumentException("Data to be initialized must not be empty.");
+        }
+
+        mRandom.setSeed(System.currentTimeMillis());
+        double rulerValue = 0;
+
+        switch (type) {
+            case sTYPE_MEMORY:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextInt(200) + 900; // [900, 1100)
+                }
+                rulerValue = 50;
+                break;
+            case sTYPE_FPS:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextInt(80) + 20; // [20, 100)
+                }
+                rulerValue = 10;
+                break;
+            case sTYPE_CPU:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextDouble(); // [0, 1)
+                }
+                rulerValue = 0.2;
+                break;
+            case sTYPE_UI:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextInt(400) + 600; // [400, 1000)
+                }
+                rulerValue = 200;
+                break;
+            case sTYPE_GPU:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextDouble() * 6 - 1; // [-1, 5)
+                }
+                rulerValue = 1;
+                break;
+            case sTYPE_TEMPERATURE:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextInt(25) + 10; // [25, 35)
+                }
+                rulerValue = 5;
+                break;
+            case sTYPE_CURRENT:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextDouble() * 3 - 1; // [-1, 2)
+                }
+                rulerValue = 0.2;
+                break;
+            case sTYPE_NETWORK_STATUS:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextInt(11) - 2; // [-2, 9)
+                }
+                rulerValue = 1;
+                break;
+            case sTYPE_CPU_SPEED:
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = mRandom.nextDouble() * 5; // [0, 5)
+                }
+                rulerValue = 0.5;
+                break;
+        }
+
+        return rulerValue;
+    }
+
+    public double generateNewDoubleDataForLineAndBar(int type) {
+        mRandom.setSeed(System.currentTimeMillis());
+        switch (type) {
+            case sTYPE_MEMORY:
+                return mRandom.nextInt(200) + 900;
+            case sTYPE_FPS:
+                return mRandom.nextInt(80) + 20;
+            case sTYPE_UI:
+                return mRandom.nextInt(400) + 600;
+            case sTYPE_TEMPERATURE:
+                return mRandom.nextInt(25) + 10;
+            case sTYPE_NETWORK_STATUS:
+                return mRandom.nextInt(11) - 2;
+            case sTYPE_CPU:
+                return mRandom.nextDouble();
+            case sTYPE_GPU:
+                return mRandom.nextDouble() * 6 - 1;
+            case sTYPE_CURRENT:
+                return mRandom.nextDouble() * 3 - 1;
+            case sTYPE_CPU_SPEED:
+                return mRandom.nextDouble() * 5; // [0, 5)
+        }
+
+        throw new IllegalArgumentException("Type invalid");
+    }
+
+    public PieChartView.Data generateNewDataForPie(int[] data, int type) {
+        if (Utils.arrayEmpty(data)) {
+            return null;
+        }
+
+        switch (type) {
+//            case sTYPE_MEMORY:
+//                for (int i = 0; i < mMemoryFakeData.length; i++) {
+//                    mMemoryFakeData[i] = mRandom.nextInt(200) + 900; // [900, 1100)
+//                }
+//                initChart(mMemoryFakeData);
+//                break;
+//            case sTYPE_FPS:
+//                for (int i = 0; i < mFpsFakeData.length; i++) {
+//                    mFpsFakeData[i] = mRandom.nextInt(80) + 20; // [20, 100)
+//                }
+//                initChart(mFpsFakeData);
+//                break;
+//            case sTYPE_CPU:
+//                for (int i = 0; i < mCPUFakeData.length; i++) {
+//                    mCPUFakeData[i] = mRandom.nextDouble(); // [0, 1)
+//                }
+//                initChart(mCPUFakeData);
+//                break;
+//            case sTYPE_UI:
+//                for (int i = 0; i < mUIStallFakeData.length; i++) {
+//                    mUIStallFakeData[i] = mRandom.nextInt(400) + 600; // [400, 1000)
+//                }
+//                initChart(mUIStallFakeData);
+//                break;
+//            case sTYPE_GPU:
+//                for (int i = 0; i < mGPUFakeData.length; i++) {
+//                    mGPUFakeData[i] = mRandom.nextDouble() * 6 - 1; // [-1, 5)
+//                }
+//                initChart(mGPUFakeData);
+//                break;
+//            case sTYPE_TEMPERATURE:
+//                for (int i = 0; i < mTemperatureFakeData.length; i++) {
+//                    mTemperatureFakeData[i] = mRandom.nextInt(25) + 10; // [25, 35)
+//                }
+//                initChart(mTemperatureFakeData);
+//                break;
+//            case sTYPE_CURRENT:
+//                for (int i = 0; i < mCurrentFakeData.length; i++) {
+//                    mCurrentFakeData[i] = mRandom.nextDouble() * 3 - 1; // [-1, 2)
+//                }
+//                initChart(mCurrentFakeData);
+//                break;
+            case sTYPE_NETWORK_STATUS:
+                int index = mRandom.nextInt(10);
+                return new PieChartView.Data(data[index], String.valueOf(index));
+//            case sTYPE_CPU_SPEED:
+//                for (int i = 0; i < mCPUSpeedFakeData.length; i++) {
+//                    mCPUSpeedFakeData[i] = mRandom.nextDouble() * 5; // [0, 5)
+//                }
+//                initChart(mCPUSpeedFakeData);
+//                break;
+        }
+        return null;
+    }
+
+    public List<PieChartView.Data> initRawDataForPie(int[] data, int type) {
+        if (Utils.arrayEmpty(data)) {
+            return null;
+        }
+
+        List<PieChartView.Data> list = new ArrayList<>();
+        switch (type) {
+//            case sTYPE_MEMORY:
+//                for (int i = 0; i < mMemoryFakeData.length; i++) {
+//                    mMemoryFakeData[i] = mRandom.nextInt(200) + 900; // [900, 1100)
+//                }
+//                initChart(mMemoryFakeData);
+//                break;
+//            case sTYPE_FPS:
+//                for (int i = 0; i < mFpsFakeData.length; i++) {
+//                    mFpsFakeData[i] = mRandom.nextInt(80) + 20; // [20, 100)
+//                }
+//                initChart(mFpsFakeData);
+//                break;
+//            case sTYPE_CPU:
+//                for (int i = 0; i < mCPUFakeData.length; i++) {
+//                    mCPUFakeData[i] = mRandom.nextDouble(); // [0, 1)
+//                }
+//                initChart(mCPUFakeData);
+//                break;
+//            case sTYPE_UI:
+//                for (int i = 0; i < mUIStallFakeData.length; i++) {
+//                    mUIStallFakeData[i] = mRandom.nextInt(400) + 600; // [400, 1000)
+//                }
+//                initChart(mUIStallFakeData);
+//                break;
+//            case sTYPE_GPU:
+//                for (int i = 0; i < mGPUFakeData.length; i++) {
+//                    mGPUFakeData[i] = mRandom.nextDouble() * 6 - 1; // [-1, 5)
+//                }
+//                initChart(mGPUFakeData);
+//                break;
+//            case sTYPE_TEMPERATURE:
+//                for (int i = 0; i < mTemperatureFakeData.length; i++) {
+//                    mTemperatureFakeData[i] = mRandom.nextInt(25) + 10; // [25, 35)
+//                }
+//                initChart(mTemperatureFakeData);
+//                break;
+//            case sTYPE_CURRENT:
+//                for (int i = 0; i < mCurrentFakeData.length; i++) {
+//                    mCurrentFakeData[i] = mRandom.nextDouble() * 3 - 1; // [-1, 2)
+//                }
+//                initChart(mCurrentFakeData);
+//                break;
+            case sTYPE_NETWORK_STATUS:
+                for (int i = 0; i < data.length; i++) {
+                    int index = mRandom.nextInt(10);
+                    data[index]++; // [-2, 9)
+                    PieChartView.Data.addData(list,
+                            new PieChartView.Data(data[index], String.valueOf(index)));
+                }
+                break;
+//            case sTYPE_CPU_SPEED:
+//                for (int i = 0; i < mCPUSpeedFakeData.length; i++) {
+//                    mCPUSpeedFakeData[i] = mRandom.nextDouble() * 5; // [0, 5)
+//                }
+//                initChart(mCPUSpeedFakeData);
+//                break;
+        }
+
+        return list;
+    }
+
     private void initChart(SurfaceView view, int[] data, int type) {
         if (view instanceof LineChartView) {
             int rulerValue = 0;
             switch (type) {
                 case sTYPE_MEMORY:
+                    rulerValue = 50;
+                    break;
                 case sTYPE_UI:
                     rulerValue = 200;
                     break;
@@ -238,7 +520,11 @@ public class DataHelper {
         }
     }
 
-    private void initLineChart(LineChartView view, double[] dataArray, double rulerValue) {
+    public void initLineChart(LineChartView view, double[] dataArray, double rulerValue) {
+        if (Utils.arrayEmpty(dataArray) || rulerValue <= 0) {
+            return;
+        }
+
         List<LineChartView.Data<Double>> datas = new ArrayList<>();
         for (double value : dataArray) {
             LineChartView.Data<Double> data = new LineChartView.Data<>((double) value, new Date());
@@ -249,7 +535,11 @@ public class DataHelper {
         view.setData(datas);
     }
 
-    private void initLineChart(LineChartView view, int[] dataArray, int rulerValue) {
+    public void initLineChart(LineChartView view, int[] dataArray, int rulerValue) {
+        if (Utils.arrayEmpty(dataArray) || rulerValue <= 0) {
+            return;
+        }
+
         List<LineChartView.Data<Double>> datas = new ArrayList<>();
         for (double value : dataArray) {
             LineChartView.Data<Double> data = new LineChartView.Data<>((double) value, new Date());
@@ -260,7 +550,11 @@ public class DataHelper {
         view.setData(datas);
     }
 
-    private void initBarChart(BarChartView view, int[] dataArray) {
+    public void initBarChart(BarChartView view, int[] dataArray) {
+        if (Utils.arrayEmpty(dataArray)) {
+            return;
+        }
+
         List<BarChartView.Data> dataDouble = new ArrayList<>();
         for (int value : dataArray) {
             dataDouble.add(new BarChartView.Data((double) value, new Date()));
@@ -268,12 +562,24 @@ public class DataHelper {
         view.setData(dataDouble);
     }
 
-    private void initBarChart(BarChartView view, double[] dataArray) {
+    public void initBarChart(BarChartView view, double[] dataArray) {
+        if (Utils.arrayEmpty(dataArray)) {
+            return;
+        }
+
         List<BarChartView.Data> dataDouble = new ArrayList<>();
         for (double value : dataArray) {
             dataDouble.add(new BarChartView.Data(value, new Date()));
         }
         view.setData(dataDouble);
+    }
+
+    public void initPieChart(PieChartView view, List<PieChartView.Data> data) {
+        if (data == null || data.isEmpty()) {
+            return;
+        }
+
+        view.setData(data);
     }
 
     public void appendLineChartData(LineChartView view, int type) {
@@ -382,7 +688,7 @@ public class DataHelper {
             case sTYPE_NETWORK_STATUS:
                 int newData = mRandom.nextInt(10);
                 mNetworkStatusFakeDataForPie[newData]++;
-                view.appendData(new PieChartView.Data(mNetworkStatusFakeData[newData], new Date(), String.valueOf(newData)));
+                view.appendData(new PieChartView.Data(mNetworkStatusFakeData[newData], String.valueOf(newData)));
                 break;
 //            case sTYPE_CPU_SPEED:
 //                view.appendData(new PieChartView.Data(mRandom.nextDouble() * 5, new Date()));

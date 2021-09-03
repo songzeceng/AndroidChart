@@ -18,25 +18,26 @@ import com.example.testapplication.BarChart.BarActivity;
 import com.example.testapplication.LineChart.LineChartActivity;
 import com.example.testapplication.PieChart.PieChartActivity;
 import com.example.testapplication.service.ChartDrawService;
+import com.example.testapplication.service.MultiProcessLineChartActivity;
 
 public class MainActivity extends Activity implements View.OnClickListener {
-    private SurfaceView mMultiProcessSurface;
-    private ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            IChartDrawAidlInterface drawAidlInterface = IChartDrawAidlInterface.Stub.asInterface(service);
-            try {
-                drawAidlInterface.viewCreate(mMultiProcessSurface.getHolder().getSurface());
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-
-        }
-    };
+//    private SurfaceView mMultiProcessSurface;
+//    private ServiceConnection mConnection = new ServiceConnection() {
+//        @Override
+//        public void onServiceConnected(ComponentName name, IBinder service) {
+//            IChartDrawAidlInterface drawAidlInterface = IChartDrawAidlInterface.Stub.asInterface(service);
+//            try {
+//                drawAidlInterface.viewCreate(mMultiProcessSurface.getHolder().getSurface());
+//            } catch (RemoteException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName name) {
+//
+//        }
+//    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,7 +48,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         findViewById(R.id.btn_pie).setOnClickListener(this);
         findViewById(R.id.btn_multi_process).setOnClickListener(this);
 
-        mMultiProcessSurface = findViewById(R.id.surface_multi_process);
+//        mMultiProcessSurface = findViewById(R.id.surface_multi_process);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -65,10 +66,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 dest = PieChartActivity.class;
                 break;
             case R.id.btn_multi_process:
-                Intent intent = new Intent(this, ChartDrawService.class);
-                intent.putExtra("chart_type", 0);
-                bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-                return;
+                dest = MultiProcessLineChartActivity.class;
         }
 
         if (dest != null) {
@@ -79,6 +77,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(mConnection);
+//        unbindService(mConnection);
     }
 }

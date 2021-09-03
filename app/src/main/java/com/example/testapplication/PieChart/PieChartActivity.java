@@ -40,15 +40,15 @@ public class PieChartActivity extends Activity implements View.OnClickListener, 
                 .addOnGlobalLayoutListener(() -> mScrollContainer.post(()
                         -> mScrollContainer.fullScroll(View.FOCUS_RIGHT)));
 
-//        findViewById(R.id.btn_cpu_pie).setOnClickListener(this);
-//        findViewById(R.id.btn_cpu_speed_pie).setOnClickListener(this);
-//        findViewById(R.id.btn_current_pie).setOnClickListener(this);
-//        findViewById(R.id.btn_fps_pie).setOnClickListener(this);
-//        findViewById(R.id.btn_gpu_pie).setOnClickListener(this);
-//        findViewById(R.id.btn_memory_pie).setOnClickListener(this);
-        findViewById(R.id.btn_network_status_pie).setOnClickListener(this);
-//        findViewById(R.id.btn_temperature_pie).setOnClickListener(this);
-//        findViewById(R.id.btn_ui_stall_duration_pie).setOnClickListener(this);
+//        findViewById(R.id.btn_cpu).setOnClickListener(this);
+//        findViewById(R.id.btn_cpu_speed).setOnClickListener(this);
+//        findViewById(R.id.btn_current).setOnClickListener(this);
+//        findViewById(R.id.btn_fps).setOnClickListener(this);
+//        findViewById(R.id.btn_gpu).setOnClickListener(this);
+//        findViewById(R.id.btn_memory).setOnClickListener(this);
+        findViewById(R.id.btn_network_status).setOnClickListener(this);
+//        findViewById(R.id.btn_temperature).setOnClickListener(this);
+//        findViewById(R.id.btn_ui_stall_duration).setOnClickListener(this);
 
         initData(sTYPE_NETWORK_STATUS);
     }
@@ -63,31 +63,31 @@ public class PieChartActivity extends Activity implements View.OnClickListener, 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-//            case R.id.btn_memory_pie:
+//            case R.id.btn_memory:
 //                initData(sTYPE_MEMORY);
 //                break;
-//            case R.id.btn_cpu_pie:
+//            case R.id.btn_cpu:
 //                initData(sTYPE_CPU);
 //                break;
-//            case R.id.btn_cpu_speed_pie:
+//            case R.id.btn_cpu_speed:
 //                initData(sTYPE_CPU_SPEED);
 //                break;
-//            case R.id.btn_current_pie:
+//            case R.id.btn_current:
 //                initData(sTYPE_CURRENT);
 //                break;
-//            case R.id.btn_fps_pie:
+//            case R.id.btn_fps:
 //                initData(sTYPE_FPS);
 //                break;
-//            case R.id.btn_gpu_pie:
+//            case R.id.btn_gpu:
 //                initData(sTYPE_GPU);
 //                break;
-            case R.id.btn_network_status_pie:
+            case R.id.btn_network_status:
                 initData(sTYPE_NETWORK_STATUS);
                 break;
-//            case R.id.btn_temperature_pie:
+//            case R.id.btn_temperature:
 //                initData(sTYPE_TEMPERATURE);
 //                break;
-//            case R.id.btn_ui_stall_duration_pie:
+//            case R.id.btn_ui_stall_duration:
 //                initData(sTYPE_UI);
 //                break;
         }

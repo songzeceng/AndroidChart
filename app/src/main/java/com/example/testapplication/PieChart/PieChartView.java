@@ -7,6 +7,8 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
 import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Surface;
@@ -367,18 +369,35 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback,
         drawCanvas(surface.lockHardwareCanvas());
     }
 
-    public static class Data {
+    public static class Data implements Parcelable {
         double value; // frequency value
-        Date time;
         int color;
         double ratio;
         String info = "";
 
-        public Data(double value, Date time, String info) {
+        public Data(double value, String info) {
             this.value = value;
-            this.time = time;
             this.info = info;
         }
+
+        protected Data(Parcel in) {
+            value = in.readDouble();
+            color = in.readInt();
+            ratio = in.readDouble();
+            info = in.readString();
+        }
+
+        public static final Creator<Data> CREATOR = new Creator<Data>() {
+            @Override
+            public Data createFromParcel(Parcel in) {
+                return new Data(in);
+            }
+
+            @Override
+            public Data[] newArray(int size) {
+                return new Data[size];
+            }
+        };
 
         public static void addData(List<PieChartView.Data> list, PieChartView.Data data) {
             if (data == null || TextUtils.isEmpty(data.info)) {
@@ -404,6 +423,19 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback,
             if (!existed) {
                 list.add(data);
             }
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeDouble(value);
+            dest.writeInt(color);
+            dest.writeDouble(ratio);
+            dest.writeString(info);
         }
     }
 }

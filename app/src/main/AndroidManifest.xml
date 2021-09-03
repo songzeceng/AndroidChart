@@ -20,6 +20,8 @@
         <activity android:name=".LineChart.LineChartActivity"/>
         <activity android:name=".BarChart.BarActivity"/>
         <activity android:name=".PieChart.PieChartActivity"/>
+        <activity android:name=".service.MultiProcessLineChartActivity"/>
+        <activity android:name=".service.PopupWindowActivity"/>
 
         <service android:name=".service.ChartDrawService"
             android:enabled="true"

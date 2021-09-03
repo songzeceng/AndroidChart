@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".LineChart.LineChartActivity">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -41,21 +40,21 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <Button
-                    android:id="@+id/btn_memory_line"
+                    android:id="@+id/btn_memory"
                     android:text="内存伪数据"
                     android:layout_marginLeft="5dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
                 <Button
-                    android:id="@+id/btn_fps_line"
+                    android:id="@+id/btn_fps"
                     android:text="FPS伪数据"
                     android:layout_marginLeft="12dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
                 <Button
-                    android:id="@+id/btn_cpu_line"
+                    android:id="@+id/btn_cpu"
                     android:text="CPU占用率伪数据"
                     android:layout_marginLeft="12dp"
                     android:layout_width="wrap_content"
@@ -67,21 +66,21 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <Button
-                    android:id="@+id/btn_ui_stall_duration_line"
+                    android:id="@+id/btn_ui_stall_duration"
                     android:text="UI卡顿时长"
                     android:layout_marginLeft="5dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
                 <Button
-                    android:id="@+id/btn_gpu_line"
+                    android:id="@+id/btn_gpu"
                     android:text="GPU负载伪数据"
                     android:layout_marginLeft="7dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
                 <Button
-                    android:id="@+id/btn_temperature_line"
+                    android:id="@+id/btn_temperature"
                     android:text="电池温度伪数据"
                     android:layout_marginLeft="7dp"
                     android:layout_width="wrap_content"
@@ -93,21 +92,21 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <Button
-                    android:id="@+id/btn_current_line"
+                    android:id="@+id/btn_current"
                     android:text="电流伪数据"
                     android:layout_marginLeft="3dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
                 <Button
-                    android:id="@+id/btn_network_status_line"
+                    android:id="@+id/btn_network_status"
                     android:text="网络状态伪数据"
                     android:layout_marginLeft="10dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
                 <Button
-                    android:id="@+id/btn_cpu_speed_line"
+                    android:id="@+id/btn_cpu_speed"
                     android:text="CPU速率伪数据"
                     android:layout_marginLeft="10dp"
                     android:layout_width="wrap_content"

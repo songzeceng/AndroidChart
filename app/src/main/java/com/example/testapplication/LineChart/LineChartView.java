@@ -9,6 +9,8 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -18,6 +20,7 @@ import androidx.annotation.NonNull;
 import com.example.testapplication.interfaces.IChart;
 import com.example.testapplication.utils.Utils;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -295,26 +298,23 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
     private void drawTable(Canvas canvas) {
         int tableEnd = getTableEnd();
 
-        int rulerCount = (int) (maxValue / rulerValue);
-        int rulerMaxCount = maxValue % rulerValue > 0 ? rulerCount + 1 : rulerCount;
-        int rulerMax = (int) (rulerValue * rulerMaxCount + rulerValueDefault);
-
-        tablePath.moveTo(stepStart, -getValueHeight(rulerMax));//加上顶部的间隔
-        tablePath.lineTo(stepStart, 0);//标尺y轴
-        tablePath.lineTo(tableEnd, 0);//标尺x轴
-
         double startValue = minValue - (minValue > 0 ? 0 : minValue % rulerValue);
         double endValue = maxValue + rulerValue;
 
+        int startHeight;
         //标尺y轴连接线
         do {
-            int startHeight = -getValueHeight(startValue);
+            startHeight = -getValueHeight(startValue);
             tablePath.moveTo(stepStart, startHeight);
             tablePath.lineTo(tableEnd, startHeight);
             //绘制y轴刻度单位
             drawRulerYText(canvas, String.format(Locale.CHINA, "%.2f", startValue), stepStart, startHeight);
             startValue += rulerValue;
         } while (startValue < endValue);
+
+        tablePath.moveTo(stepStart, startHeight);//加上顶部的间隔
+        tablePath.lineTo(stepStart, 0);//标尺y轴
+        tablePath.lineTo(tableEnd, 0);//标尺x轴
 
         canvas.drawPath(tablePath, tablePaint);
         //绘制x轴刻度单位

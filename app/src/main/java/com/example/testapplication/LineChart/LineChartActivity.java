@@ -47,15 +47,15 @@ public class LineChartActivity extends Activity implements IHandler, View.OnClic
                 .addOnGlobalLayoutListener(() -> mScrollContainer.post(()
                         -> mScrollContainer.fullScroll(View.FOCUS_RIGHT)));
 
-        findViewById(R.id.btn_cpu_line).setOnClickListener(this);
-        findViewById(R.id.btn_cpu_speed_line).setOnClickListener(this);
-        findViewById(R.id.btn_current_line).setOnClickListener(this);
-        findViewById(R.id.btn_fps_line).setOnClickListener(this);
-        findViewById(R.id.btn_gpu_line).setOnClickListener(this);
-        findViewById(R.id.btn_memory_line).setOnClickListener(this);
-        findViewById(R.id.btn_network_status_line).setOnClickListener(this);
-        findViewById(R.id.btn_temperature_line).setOnClickListener(this);
-        findViewById(R.id.btn_ui_stall_duration_line).setOnClickListener(this);
+        findViewById(R.id.btn_cpu).setOnClickListener(this);
+        findViewById(R.id.btn_cpu_speed).setOnClickListener(this);
+        findViewById(R.id.btn_current).setOnClickListener(this);
+        findViewById(R.id.btn_fps).setOnClickListener(this);
+        findViewById(R.id.btn_gpu).setOnClickListener(this);
+        findViewById(R.id.btn_memory).setOnClickListener(this);
+        findViewById(R.id.btn_network_status).setOnClickListener(this);
+        findViewById(R.id.btn_temperature).setOnClickListener(this);
+        findViewById(R.id.btn_ui_stall_duration).setOnClickListener(this);
 
         initData(sTYPE_MEMORY);
     }
@@ -70,31 +70,31 @@ public class LineChartActivity extends Activity implements IHandler, View.OnClic
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.btn_memory_line:
+            case R.id.btn_memory:
                 initData(sTYPE_MEMORY);
                 break;
-            case R.id.btn_cpu_line:
+            case R.id.btn_cpu:
                 initData(sTYPE_CPU);
                 break;
-            case R.id.btn_cpu_speed_line:
+            case R.id.btn_cpu_speed:
                 initData(sTYPE_CPU_SPEED);
                 break;
-            case R.id.btn_current_line:
+            case R.id.btn_current:
                 initData(sTYPE_CURRENT);
                 break;
-            case R.id.btn_fps_line:
+            case R.id.btn_fps:
                 initData(sTYPE_FPS);
                 break;
-            case R.id.btn_gpu_line:
+            case R.id.btn_gpu:
                 initData(sTYPE_GPU);
                 break;
-            case R.id.btn_network_status_line:
+            case R.id.btn_network_status:
                 initData(sTYPE_NETWORK_STATUS);
                 break;
-            case R.id.btn_temperature_line:
+            case R.id.btn_temperature:
                 initData(sTYPE_TEMPERATURE);
                 break;
-            case R.id.btn_ui_stall_duration_line:
+            case R.id.btn_ui_stall_duration:
                 initData(sTYPE_UI);
                 break;
         }

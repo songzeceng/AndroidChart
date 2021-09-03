@@ -13,10 +13,6 @@ import com.example.testapplication.interfaces.IHandler;
 import com.example.testapplication.utils.DataHelper;
 import com.example.testapplication.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import static com.example.testapplication.utils.Utils.sTYPE_CPU;
 import static com.example.testapplication.utils.Utils.sTYPE_CPU_SPEED;
 import static com.example.testapplication.utils.Utils.sTYPE_CURRENT;
@@ -51,15 +47,15 @@ public class BarActivity extends Activity implements View.OnClickListener, IHand
                 .addOnGlobalLayoutListener(() -> mScrollContainer.post(()
                         -> mScrollContainer.fullScroll(View.FOCUS_RIGHT)));
 
-        findViewById(R.id.btn_cpu_bar).setOnClickListener(this);
-        findViewById(R.id.btn_cpu_speed_bar).setOnClickListener(this);
-        findViewById(R.id.btn_current_bar).setOnClickListener(this);
-        findViewById(R.id.btn_fps_bar).setOnClickListener(this);
-        findViewById(R.id.btn_gpu_bar).setOnClickListener(this);
-        findViewById(R.id.btn_memory_bar).setOnClickListener(this);
-        findViewById(R.id.btn_network_status_bar).setOnClickListener(this);
-        findViewById(R.id.btn_temperature_bar).setOnClickListener(this);
-        findViewById(R.id.btn_ui_stall_duration_bar).setOnClickListener(this);
+        findViewById(R.id.btn_cpu).setOnClickListener(this);
+        findViewById(R.id.btn_cpu_speed).setOnClickListener(this);
+        findViewById(R.id.btn_current).setOnClickListener(this);
+        findViewById(R.id.btn_fps).setOnClickListener(this);
+        findViewById(R.id.btn_gpu).setOnClickListener(this);
+        findViewById(R.id.btn_memory).setOnClickListener(this);
+        findViewById(R.id.btn_network_status).setOnClickListener(this);
+        findViewById(R.id.btn_temperature).setOnClickListener(this);
+        findViewById(R.id.btn_ui_stall_duration).setOnClickListener(this);
 
         initData(sTYPE_MEMORY);
     }
@@ -74,31 +70,31 @@ public class BarActivity extends Activity implements View.OnClickListener, IHand
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.btn_memory_bar:
+            case R.id.btn_memory:
                 initData(sTYPE_MEMORY);
                 break;
-            case R.id.btn_cpu_bar:
+            case R.id.btn_cpu:
                 initData(sTYPE_CPU);
                 break;
-            case R.id.btn_cpu_speed_bar:
+            case R.id.btn_cpu_speed:
                 initData(sTYPE_CPU_SPEED);
                 break;
-            case R.id.btn_current_bar:
+            case R.id.btn_current:
                 initData(sTYPE_CURRENT);
                 break;
-            case R.id.btn_fps_bar:
+            case R.id.btn_fps:
                 initData(sTYPE_FPS);
                 break;
-            case R.id.btn_gpu_bar:
+            case R.id.btn_gpu:
                 initData(sTYPE_GPU);
                 break;
-            case R.id.btn_network_status_bar:
+            case R.id.btn_network_status:
                 initData(sTYPE_NETWORK_STATUS);
                 break;
-            case R.id.btn_temperature_bar:
+            case R.id.btn_temperature:
                 initData(sTYPE_TEMPERATURE);
                 break;
-            case R.id.btn_ui_stall_duration_bar:
+            case R.id.btn_ui_stall_duration:
                 initData(sTYPE_UI);
                 break;
         }
