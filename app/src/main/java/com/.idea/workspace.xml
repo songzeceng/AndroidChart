@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="1f7e8924-8d60-437a-bb46-70ebc2d12c81" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/example/testapplication/BarChart/BarActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/testapplication/BarChart/BarActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/testapplication/BarChart/BarChartView.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/testapplication/BarChart/BarChartView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/testapplication/CanvasView.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/testapplication/LineChart/LineChartActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/testapplication/LineChart/LineChartActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/testapplication/LineChart/LineChartView.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/testapplication/LineChart/LineChartView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/testapplication/PieChart/PieChartActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/testapplication/PieChart/PieChartActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/testapplication/PieChart/PieChartView.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/testapplication/PieChart/PieChartView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/testapplication/interfaces/IChart.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/testapplication/service/DrawChartPopupWindow.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/testapplication/service/DrawChartPopupWindow.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/testapplication/service/MultiProcessLineChartActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/testapplication/service/MultiProcessLineChartActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/testapplication/service/PopupWindowActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/testapplication/service/PopupWindowActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/testapplication/utils/DataHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/testapplication/utils/DataHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../res/layout/subprocess_line.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../res/layout/subprocess_line.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../../../.." />
+  </component>
+  <component name="ProjectId" id="1yiDEfuL8Vg2eVnz5SxhSH9sZNV" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="HAS_MATRIX_ENV_SETUP" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="AndroidSdkUpdater" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="1f7e8924-8d60-437a-bb46-70ebc2d12c81" name="Default Changelist" comment="" />
+      <created>1632725404744</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1632725404744</updated>
+    </task>
+    <servers />
+  </component>
+</project>

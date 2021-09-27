@@ -6,29 +6,25 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 
-import com.example.testapplication.interfaces.IChart;
 import com.example.testapplication.utils.Utils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-public class PieChartView extends SurfaceView implements SurfaceHolder.Callback, IChart {
+public class PieChartView extends SurfaceView implements SurfaceHolder.Callback {
     private static final HashMap<Integer, Integer> sALL_COLORS = new HashMap<>();
     private float mRadius;
     private Random mRandom = new Random();
@@ -119,7 +115,6 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback,
         mHolder = getHolder();
         mHolder.setFormat(PixelFormat.TRANSPARENT);
         mHolder.addCallback(this);
-        setZOrderOnTop(true);
 
         mArcPaint = new Paint();
         mArcPaint.setStyle(Paint.Style.FILL);
@@ -360,13 +355,8 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback,
         mDrawThread.interrupt();
     }
 
-    @Override
-    public void draw(Surface surface) {
-        if (surface == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return;
-        }
-
-        drawCanvas(surface.lockHardwareCanvas());
+    public int getDataCount() {
+        return mData == null ? 0 : mData.size();
     }
 
     public static class Data implements Parcelable {

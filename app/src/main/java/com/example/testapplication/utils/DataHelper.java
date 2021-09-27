@@ -1,6 +1,7 @@
 package com.example.testapplication.utils;
 
 import android.view.SurfaceView;
+import android.view.View;
 
 import com.example.testapplication.BarChart.BarChartView;
 import com.example.testapplication.LineChart.LineChartView;
@@ -62,7 +63,7 @@ public class DataHelper {
         return sInstance;
     }
 
-    public void initData(SurfaceView view, int type) {
+    public void initData(View view, int type) {
         if (view == null || (!(view instanceof BarChartView) && !(view instanceof LineChartView) && !(view instanceof PieChartView))) {
             return;
         }
@@ -473,7 +474,7 @@ public class DataHelper {
         return list;
     }
 
-    private void initChart(SurfaceView view, int[] data, int type) {
+    private void initChart(View view, int[] data, int type) {
         if (view instanceof LineChartView) {
             int rulerValue = 0;
             switch (type) {
@@ -499,7 +500,7 @@ public class DataHelper {
         }
     }
 
-    private void initChart(SurfaceView view, double[] data, int type) {
+    private void initChart(View view, double[] data, int type) {
         if (view instanceof LineChartView) {
             double rulerValue = 10;
             switch (type) {
@@ -525,9 +526,9 @@ public class DataHelper {
             return;
         }
 
-        List<LineChartView.Data<Double>> datas = new ArrayList<>();
+        List<LineChartView.Data> datas = new ArrayList<>();
         for (double value : dataArray) {
-            LineChartView.Data<Double> data = new LineChartView.Data<>((double) value, new Date());
+            LineChartView.Data data = new LineChartView.Data((double) value, new Date());
             datas.add(data);
         }
 
@@ -540,9 +541,9 @@ public class DataHelper {
             return;
         }
 
-        List<LineChartView.Data<Double>> datas = new ArrayList<>();
+        List<LineChartView.Data> datas = new ArrayList<>();
         for (double value : dataArray) {
-            LineChartView.Data<Double> data = new LineChartView.Data<>((double) value, new Date());
+            LineChartView.Data data = new LineChartView.Data((double) value, new Date());
             datas.add(data);
         }
 
@@ -589,38 +590,38 @@ public class DataHelper {
 
         switch (type) {
             case sTYPE_MEMORY:
-                view.appendData(new LineChartView.Data<Integer>(mRandom.nextInt(200) + 900,
+                view.appendData(new LineChartView.Data((double) (mRandom.nextInt(200) + 900),
                         new Date()));
                 break;
             case sTYPE_FPS:
-                view.appendData(new LineChartView.Data<Integer>(mRandom.nextInt(80) + 20,
+                view.appendData(new LineChartView.Data((double) (mRandom.nextInt(80) + 20),
                         new Date()));
                 break;
             case sTYPE_CPU:
-                view.appendData(new LineChartView.Data<Double>(mRandom.nextDouble(),  new Date()));
+                view.appendData(new LineChartView.Data(mRandom.nextDouble(),  new Date()));
                 break;
             case sTYPE_UI:
-                view.appendData(new LineChartView.Data<Integer>(mRandom.nextInt(600) + 400,
+                view.appendData(new LineChartView.Data((double) (mRandom.nextInt(600) + 400),
                         new Date()));
                 break;
             case sTYPE_GPU:
-                view.appendData(new LineChartView.Data<Double>(mRandom.nextDouble() * 6 - 1,
+                view.appendData(new LineChartView.Data(mRandom.nextDouble() * 6 - 1,
                         new Date()));
                 break;
             case sTYPE_TEMPERATURE:
-                view.appendData(new LineChartView.Data<Integer>(mRandom.nextInt(10) + 25,
+                view.appendData(new LineChartView.Data((double) (mRandom.nextInt(10) + 25),
                         new Date()));
                 break;
             case sTYPE_CURRENT:
-                view.appendData(new LineChartView.Data<Double>(mRandom.nextDouble() * 3 - 1,
+                view.appendData(new LineChartView.Data(mRandom.nextDouble() * 3 - 1,
                         new Date()));
                 break;
             case sTYPE_NETWORK_STATUS:
-                view.appendData(new LineChartView.Data<Integer>(mRandom.nextInt(11) - 2,
+                view.appendData(new LineChartView.Data((double) (mRandom.nextInt(11) - 2),
                         new Date()));
                 break;
             case sTYPE_CPU_SPEED:
-                view.appendData(new LineChartView.Data<Double>(mRandom.nextDouble() * 5,
+                view.appendData(new LineChartView.Data(mRandom.nextDouble() * 5,
                         new Date()));
                 break;
         }
@@ -696,7 +697,7 @@ public class DataHelper {
         }
     }
 
-    public void clearData(SurfaceView view) {
+    public void clearData(View view) {
         if (view == null || (!(view instanceof BarChartView) || !(view instanceof LineChartView) || !(view instanceof PieChartView))) {
             return;
         }

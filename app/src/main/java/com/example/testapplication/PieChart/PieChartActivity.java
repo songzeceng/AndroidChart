@@ -55,7 +55,11 @@ public class PieChartActivity extends Activity implements View.OnClickListener, 
 
     @Override
     public void handleMessage(Message msg) {
-        DataHelper.getInstance().appendPieChartView(mPieChartView, msg.what);
+        if (mPieChartView.getDataCount() > 60) {
+            DataHelper.getInstance().initData(mPieChartView, msg.what);
+        } else {
+            DataHelper.getInstance().appendPieChartView(mPieChartView, msg.what);
+        }
         mHandler.sendEmptyMessageDelayed(msg.what, Utils.sINTERVAL_UPDATE_DATA);
     }
 

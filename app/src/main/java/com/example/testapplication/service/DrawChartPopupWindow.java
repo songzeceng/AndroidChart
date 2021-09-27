@@ -37,7 +37,7 @@ import static com.example.testapplication.utils.Utils.sTYPE_UI;
 
 public class DrawChartPopupWindow implements PopupWindow.OnDismissListener, View.OnClickListener, IHandler {
     private PopupWindow mPopupWindow;
-//    private Activity mActivity;
+    private Activity mActivity;
     private IPopupWindowListener mListener;
     private View mParentView;
     private int mWidth;
@@ -54,7 +54,7 @@ public class DrawChartPopupWindow implements PopupWindow.OnDismissListener, View
     private WeakHandler mHandler = new WeakHandler(this);
 
     public DrawChartPopupWindow(int chartType, View parentView, View contentView, IPopupWindowListener listener, int width, int
-            height, boolean focusable) {
+            height, Activity activity, boolean focusable) {
 
         mChartType = chartType;
         mListener = listener;
@@ -63,6 +63,7 @@ public class DrawChartPopupWindow implements PopupWindow.OnDismissListener, View
         mHeight = height;
         this.focusable = focusable;
         mPopupWindowView = contentView;
+        mActivity = activity;
     }
 
     public void showView() {
@@ -83,6 +84,12 @@ public class DrawChartPopupWindow implements PopupWindow.OnDismissListener, View
                 mPieChartView = (PieChartView) mPopupWindowView.findViewById(R.id.pie_chart_view);
                 break;
         }
+
+        WindowManager.LayoutParams lp = mActivity.getWindow()
+                .getAttributes();
+        lp.alpha = 1.0f;
+        (mActivity).getWindow().setAttributes(lp);
+        mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
         mScrollContainer = mPopupWindowView.findViewById(R.id.scroll_container);
         mScrollContainer.getViewTreeObserver()
@@ -113,6 +120,10 @@ public class DrawChartPopupWindow implements PopupWindow.OnDismissListener, View
         }
 
         DataHelper.getInstance().initPieChart(mPieChartView, data);
+        showWindow();
+    }
+
+    private void showWindow() {
         mPopupWindow.update();
         mPopupWindow.showAtLocation(mParentView, Gravity.CENTER, 0, 0);
     }
@@ -123,8 +134,7 @@ public class DrawChartPopupWindow implements PopupWindow.OnDismissListener, View
         }
 
         DataHelper.getInstance().initBarChart(mBarChartView, data);
-        mPopupWindow.update();
-        mPopupWindow.showAtLocation(mParentView, Gravity.CENTER, 0, 0);
+        showWindow();
     }
 
     public void initLineChartData(double[] data, double ruler_value) {
@@ -133,8 +143,7 @@ public class DrawChartPopupWindow implements PopupWindow.OnDismissListener, View
         }
 
         DataHelper.getInstance().initLineChart(mLineChartView, data, ruler_value);
-        mPopupWindow.update();
-        mPopupWindow.showAtLocation(mParentView, Gravity.CENTER, 0, 0);
+        showWindow();
     }
 
     public void updatePieChart(PieChartView.Data data) {
@@ -142,6 +151,9 @@ public class DrawChartPopupWindow implements PopupWindow.OnDismissListener, View
             return;
         }
         mPieChartView.appendData(data);
+        if (!mPopupWindow.isShowing()) {
+            showWindow();
+        }
     }
 
     public void updateBarChart(double data, Date date) {
@@ -149,6 +161,9 @@ public class DrawChartPopupWindow implements PopupWindow.OnDismissListener, View
             return;
         }
         mBarChartView.appendData(new BarChartView.Data(data, date));
+        if (!mPopupWindow.isShowing()) {
+            showWindow();
+        }
     }
 
     public void updateLineChart(double data, Date date) {
@@ -156,6 +171,9 @@ public class DrawChartPopupWindow implements PopupWindow.OnDismissListener, View
             return;
         }
         mLineChartView.appendData(new LineChartView.Data(data, date));
+        if (!mPopupWindow.isShowing()) {
+            showWindow();
+        }
     }
 
     /**

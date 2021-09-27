@@ -120,7 +120,11 @@ public class MultiProcessLineChartActivity extends Activity implements IHandler,
                     intent.putExtra("data", bundle);
                     sendBroadcast(intent);
 
-                    updateData(chartType, dataType);
+                    sendMessage(chartType, dataType);
+                    break;
+                case "resume_data":
+//                    updateData(chartType, dataType);
+                    break;
             }
         }
     };
@@ -173,8 +177,8 @@ public class MultiProcessLineChartActivity extends Activity implements IHandler,
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("sub_process_activity_started");
-        filter.addAction("sub_process_data_initialized");
         filter.addAction("switch_data");
+        filter.addAction("resume_data");
 
         registerReceiver(mReceiver, filter);
     }

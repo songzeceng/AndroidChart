@@ -93,7 +93,6 @@ public class PopupWindowActivity extends Activity implements IPopupWindowListene
                             mPopupWindow.updatePieChart(pieData);
                             break;
                     }
-
                     break;
             }
         }
@@ -124,8 +123,16 @@ public class PopupWindowActivity extends Activity implements IPopupWindowListene
 
         mPopupWindowView = LayoutInflater.from(this).inflate(contentLayoutId, null);
         mPopupWindow = new DrawChartPopupWindow(mChartType, findViewById(R.id.multi_root_view), mPopupWindowView, this,
-                FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT, true);
+                FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT,  this,true);
         mPopupWindow.showView();
+
+//        findViewById(R.id.btn_show_popup).setOnClickListener(v -> {
+//            Intent resumeIntent = new Intent();
+//            resumeIntent.setAction("resume_data");
+//            resumeIntent.putExtra(sTYPE_CHART_INTENT, mChartType);
+//            resumeIntent.putExtra(sTYPE_CHART_DATA_INTENT, mDataType);
+//            sendBroadcast(resumeIntent);
+//        });
 
         mDataType = mChartType == sTYPE_CHART_PIE ? sTYPE_NETWORK_STATUS : sTYPE_MEMORY;
 

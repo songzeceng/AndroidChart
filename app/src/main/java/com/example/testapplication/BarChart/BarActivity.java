@@ -62,7 +62,11 @@ public class BarActivity extends Activity implements View.OnClickListener, IHand
 
     @Override
     public void handleMessage(Message msg) {
-        DataHelper.getInstance().appendBarChartData(mBarChartView, msg.what);
+        if (mBarChartView.getDataCount() > 60) {
+            DataHelper.getInstance().initData(mBarChartView, msg.what);
+        } else {
+            DataHelper.getInstance().appendBarChartData(mBarChartView, msg.what);
+        }
         mHandler.sendEmptyMessageDelayed(msg.what, Utils.sINTERVAL_UPDATE_DATA);
     }
 

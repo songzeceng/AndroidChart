@@ -8,14 +8,12 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.testapplication.interfaces.IChart;
 import com.example.testapplication.utils.Utils;
 
 import java.text.SimpleDateFormat;
@@ -24,7 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class BarChartView extends SurfaceView implements SurfaceHolder.Callback, IChart {
+public class BarChartView extends SurfaceView implements SurfaceHolder.Callback {
     private int defaultLineColor = Color.parseColor("#FF4081");
     private int defaultBorderColor = Color.parseColor("#BBBBBB");
     private int titleTextColor = Color.argb(255, 217, 217, 217);
@@ -143,7 +141,6 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback,
         mHolder = getHolder();
         mHolder.setFormat(PixelFormat.TRANSPARENT);
         mHolder.addCallback(this);
-        setZOrderOnTop(true);
 
         mBorderLinePaint = generatePaint();
         mBorderLinePaint.setColor(defaultBorderColor);
@@ -186,12 +183,6 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback,
                 minData = data.value;
             }
         }
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-//        draw();
     }
 
     private void drawCanvas(Canvas canvas) {
@@ -291,13 +282,8 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback,
         mDrawThread.interrupt();
     }
 
-    @Override
-    public void draw(Surface surface) {
-        if (surface == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return;
-        }
-
-        drawCanvas(surface.lockHardwareCanvas());
+    public int getDataCount() {
+        return mDatas == null ? 0 : mDatas.size();
     }
 
     public static class Data {

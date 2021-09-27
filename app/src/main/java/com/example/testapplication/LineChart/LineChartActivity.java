@@ -43,9 +43,9 @@ public class LineChartActivity extends Activity implements IHandler, View.OnClic
 
         mLineChartView = (LineChartView) findViewById(R.id.line_chart_view);
         mScrollContainer = findViewById(R.id.scroll_container);
-        mScrollContainer.getViewTreeObserver()
-                .addOnGlobalLayoutListener(() -> mScrollContainer.post(()
-                        -> mScrollContainer.fullScroll(View.FOCUS_RIGHT)));
+//        mScrollContainer.getViewTreeObserver()
+//                .addOnGlobalLayoutListener(() -> mScrollContainer.post(()
+//                        -> mScrollContainer.fullScroll(View.FOCUS_RIGHT)));
 
         findViewById(R.id.btn_cpu).setOnClickListener(this);
         findViewById(R.id.btn_cpu_speed).setOnClickListener(this);
@@ -62,7 +62,11 @@ public class LineChartActivity extends Activity implements IHandler, View.OnClic
 
     @Override
     public void handleMessage(Message msg) {
-        DataHelper.getInstance().appendLineChartData(mLineChartView, msg.what);
+        if (mLineChartView.getDataCount() > 60) {
+            DataHelper.getInstance().initData(mLineChartView, msg.what);
+        } else {
+            DataHelper.getInstance().appendLineChartData(mLineChartView, msg.what);
+        }
         mHandler.sendEmptyMessageDelayed(msg.what, Utils.sINTERVAL_UPDATE_DATA);
     }
 

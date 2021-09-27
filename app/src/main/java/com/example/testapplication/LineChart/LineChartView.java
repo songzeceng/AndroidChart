@@ -1,26 +1,22 @@
 package com.example.testapplication.LineChart;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
-import android.os.Build;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
-import android.view.Display;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import com.example.testapplication.interfaces.IChart;
 import com.example.testapplication.utils.Utils;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +29,7 @@ import java.util.Locale;
  * Created by jeanboy on 2017/6/12.
  */
 
-public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callback, IChart {
+public class LineChartView extends SurfaceView implements SurfaceHolder.Callback {
 
     private Paint linePaint;//曲线画笔
     private Paint pointPaint;//曲线上锚点画笔
@@ -88,6 +84,7 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
 
     private boolean mRunning = true;
     private SurfaceHolder mHolder;
+    private Bitmap bitmapCache;
     private Thread mDrawThread = new Thread() {
         @Override
         public void run() {
@@ -100,7 +97,14 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
                         canvas = mHolder.lockCanvas();
                     }
 
+//                    if (bitmapCache == null) {
+//                        bitmapCache = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Bitmap.Config.ARGB_8888);
+//                    }
+//                    Canvas canvasCache = new Canvas(bitmapCache);
+
                     drawCanvas(canvas);
+
+//                    canvas.drawBitmap(bitmapCache, 0, 0, null);
 
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                         mHolder.getSurface().unlockCanvasAndPost(canvas);
@@ -133,7 +137,6 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
         mHolder = getHolder();
         mHolder.setFormat(PixelFormat.TRANSPARENT);
         mHolder.addCallback(this);
-        setZOrderOnTop(true);
 
         linePaint = new Paint();
         linePaint.setAntiAlias(true);//抗锯齿
@@ -210,12 +213,6 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
         super.onFinishInflate();
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-//        draw();
-    }
-
     private void drawCanvas(Canvas canvas) {
         canvas.drawColor(Color.TRANSPARENT);//绘制背景颜色
         canvas.translate(0f, mHeight / 2f + (getViewDrawHeight() + topSpace + bottomSpace) / 2f);//设置画布中心点垂直居中
@@ -290,6 +287,8 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
         return stepEnd + tablePadding;
     }
 
+    private int mPaddingBottom = 150;
+
     /**
      * 绘制背景表格
      *
@@ -313,8 +312,8 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
         } while (startValue < endValue);
 
         tablePath.moveTo(stepStart, startHeight);//加上顶部的间隔
-        tablePath.lineTo(stepStart, 0);//标尺y轴
-        tablePath.lineTo(tableEnd, 0);//标尺x轴
+        tablePath.lineTo(stepStart, mPaddingBottom);//标尺y轴
+        tablePath.lineTo(tableEnd, mPaddingBottom);//标尺x轴
 
         canvas.drawPath(tablePath, tablePaint);
         //绘制x轴刻度单位
@@ -340,12 +339,12 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
                 if (point == null) break;
 
                 if (i == 0 ) {
-                    drawRulerXText(canvas, dateFormat.format(time), linePoints[i].x, 0);
+                    drawRulerXText(canvas, dateFormat.format(time), point.x, mPaddingBottom);
                 } else {
                     if (time != null && lastAnchorDate != null) {
                         if (time.getTime() - lastAnchorDate.getTime() > 1000 * 5) {
                             lastAnchorDate = time;
-                            drawRulerXText(canvas, dateFormat.format(time), linePoints[i].x, 0);
+                            drawRulerXText(canvas, dateFormat.format(time), point.x, mPaddingBottom);
                         }
                     }
                 }
@@ -384,13 +383,8 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
                 canvas.drawCircle(point.x, point.y, pointWidth, pointPaint);
             }
             //绘制点的文本
-            String text = "";
-            T value = (T) dataList.get(i).getValue();
-            if (value instanceof Integer) {
-                text = String.valueOf(value);
-            } else {
-                text = String.format(Locale.CHINA, "%.2f", (Double) value);
-            }
+            String text = String.format(Locale.CHINA, "%.2f", dataList.get(i).getValue());
+
             drawLinePointText(canvas, text, point.x, point.y);
         }
     }
@@ -404,7 +398,7 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
     private int getValueHeight(double value) {
         value = round(value, 2);
         double valuePercent = Math.abs(value - minValue) * 100f / (Math.abs(maxValue - minValue) * 100f);//计算value所占百分比
-        return (int) (getViewDrawHeight() * valuePercent + bottomSpace + 0.5f);//底部加上间隔
+        return (int) (getViewDrawHeight() * valuePercent + bottomSpace - mPaddingBottom);//底部加上间隔
     }
 
     /**
@@ -424,13 +418,9 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
 
         int stepTemp = getTableStart();
         Point pre = new Point();
-        double value = 0;
         Data data = dataList.get(0);
-        if (data.getValue() instanceof Integer) {
-            value = (int) data.getValue();
-        } else {
-            value = (Double) data.getValue();
-        }
+
+        double value = (Double) data.getValue();
 
         pre.set(stepTemp, -getValueHeight(value));//坐标系从0,0默认在第四象限绘制
         linePoints[0] = pre;
@@ -445,11 +435,8 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
             data = dataList.get(i);
             Point next = new Point();
 
-            if (data.getValue() instanceof Integer) {
-                value = (int) data.getValue();
-            } else {
-                value = (Double) data.getValue();
-            }
+            value = (Double) data.getValue();
+
             next.set(stepTemp += stepSpace, -getValueHeight(value));
 
             if (isBezierLine) {
@@ -485,70 +472,22 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
     }
 
     private void updateMaxMin() {
-        T max = (T) Collections.max(this.dataList, (Comparator<Data>) (o1, o2) -> {
-            if (o1.value instanceof Integer) {
-                int v1 = (Integer) o1.getValue();
-                if (o2.value instanceof Integer) {
-                    return v1 - (Integer) o2.getValue();
-                } else {
-                    double compare =  round(v1 - round((Double) o2.getValue(), 2), 2);
-                    return compare == 0 ? 0 : (compare > 0 ? 1 : -1);
-                }
-            } else if (o1.value instanceof Double) {
-                double v1 = round((Double) o1.getValue(), 2);
-                double compare = 0;
-                if (o2.value instanceof Integer) {
-                     compare = round((v1 - (Integer) o2.getValue()), 2);
-                } else {
-                    compare = round(v1 - round((Double) o2.getValue(), 2), 2);
-                }
-                return compare == 0 ? 0 : (compare > 0 ? 1 : -1);
-            }
-            return 0;
+        maxValue = Collections.max(this.dataList, (Comparator<Data>) (o1, o2) -> {
+            double compare = o1.getValue() - o2.getValue();
+
+            return compare == 0 ? 0 : (compare > 0 ? 1 : -1);
         }).getValue();
 
-        if (max instanceof Integer) {
-            maxValue =  (Integer) max;
-        } else {
-            maxValue = round((Double) max, 2);
-        }
 
-        T min = (T) Collections.min(this.dataList, (Comparator<Data>) (o1, o2) -> {
-            if (o1.value instanceof Integer) {
-                int v1 = (Integer) o1.getValue();
-                if (o2.value instanceof Integer) {
-                    return v1 - (Integer) o2.getValue();
-                } else {
-                    double compare =  round(v1 - round((Double) o2.getValue(), 2), 2);
-                    return compare == 0 ? 0 : (compare > 0 ? 1 : -1);
-                }
-            } else if (o1.value instanceof Double) {
-                double v1 = round((Double) o1.getValue(), 2);
-                double compare = 0;
-                if (o2.value instanceof Integer) {
-                    compare = round((v1 - (Integer) o2.getValue()), 2);
-                } else {
-                    compare = round(v1 - round((Double) o2.getValue(), 2), 2);
-                }
-                return compare == 0 ? 0 : (compare > 0 ? 1 : -1);
-            }
-            return 0;
+        minValue = Collections.min(this.dataList, (Comparator<Data>) (o1, o2) -> {
+            double compare = o1.getValue() - o2.getValue();
+
+            return compare == 0 ? 0 : (compare > 0 ? 1 : -1);
         }).getValue();
-
-        if (min instanceof Integer) {
-            minValue = (Integer) min;
-        } else {
-            minValue = round((Double) min, 2);
-        }
     }
 
     /*-------------可操作方法---------------*/
 
-    /**
-     * 设置数据
-     *
-     * @param dataList
-     */
     public void setData(List<Data> dataList) {
         if (dataList == null) {
             throw new RuntimeException("dataList cannot is null!");
@@ -579,21 +518,11 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
         refreshLayout();
     }
 
-    /**
-     * 设置是否是贝塞尔曲线
-     *
-     * @param isBezier
-     */
     public void setBezierLine(boolean isBezier) {
         isBezierLine = isBezier;
         refreshLayout();
     }
 
-    /**
-     * 设置标尺y轴间距
-     *
-     * @param space
-     */
     public void setRulerYSpace(double space) {
         if (space <= 0) {
             space = rulerValueDefault;
@@ -618,25 +547,20 @@ public class LineChartView<T> extends SurfaceView implements SurfaceHolder.Callb
         mDrawThread.interrupt();
     }
 
-    @Override
-    public void draw(Surface surface) {
-        if (surface == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return;
-        }
-
-        drawCanvas(surface.lockHardwareCanvas());
+    public int getDataCount() {
+        return dataList == null ? 0 : dataList.size();
     }
 
-    public static class Data<T> {
-        T value;
+    public static class Data {
+        Double value;
         Date time;
 
-        public Data(T value, Date time) {
+        public Data(Double value, Date time) {
             this.value = value;
             this.time = time;
         }
 
-        public T getValue() {
+        public Double getValue() {
             return value;
         }
     }
