@@ -10,8 +10,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 
@@ -24,9 +26,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-public class PieChartView extends SurfaceView implements SurfaceHolder.Callback {
+public class PieChartView extends SurfaceView implements SurfaceHolder.Callback, View.OnTouchListener {
     private static final HashMap<Integer, Integer> sALL_COLORS = new HashMap<>();
-    private float mRadius;
+    private float mRadius, mRadiusDefault;
     private Random mRandom = new Random();
     private int mColorUsed = 0;
 
@@ -35,16 +37,13 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback 
     private int mWidth = 0;
     private int mHeight = 0;
 
-    private float scale = 1f;
+    private double mScale = 1f;
 
-    private RectF arcRect; // 画扇形时所需的边界矩形
+    private RectF mArcRect; // 画扇形时所需的边界矩形
 
     private List<PieChartView.Data> mData = new ArrayList<>();
 
     private int lineColor = Color.parseColor("#FF4081"); // 指示线颜色
-
-    private int defaultBackColor = Color.argb(255, 217, 217, 217);
-    private SimpleDateFormat mDateFormat = new SimpleDateFormat("HH:mm");
 
     private boolean mRunning = true;
     private SurfaceHolder mHolder;
@@ -53,27 +52,39 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback 
         public void run() {
             try {
                 while (mRunning) {
-                    Canvas canvas;
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        canvas = mHolder.getSurface().lockHardwareCanvas();
-                    } else {
-                        canvas = mHolder.lockCanvas();
-                    }
+                    Canvas canvas = getCanvas();
 
                     drawCanvas(canvas);
 
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        mHolder.getSurface().unlockCanvasAndPost(canvas);
-                    } else {
-                        mHolder.unlockCanvasAndPost(canvas);
-                    }
-                    Thread.sleep(Utils.sINTERVAL_UPDATE_PIE);
+                    unlockCanvas(canvas);
+                    Thread.sleep(Utils.sINTERVAL_UPDATE_CHART);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     };
+    private double mStartDistance;
+    private double mScaleNew = 1f;
+    private boolean mIntialized = false;
+
+    private void unlockCanvas(Canvas canvas) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            mHolder.getSurface().unlockCanvasAndPost(canvas);
+        } else {
+            mHolder.unlockCanvasAndPost(canvas);
+        }
+    }
+
+    private Canvas getCanvas() {
+        Canvas canvas;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            canvas = mHolder.getSurface().lockHardwareCanvas();
+        } else {
+            canvas = mHolder.lockCanvas();
+        }
+        return canvas;
+    }
 
     public PieChartView(Context context) {
         this(context, null);
@@ -112,17 +123,23 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback 
     }
 
     private void init() {
-        mHolder = getHolder();
-        mHolder.setFormat(PixelFormat.TRANSPARENT);
-        mHolder.addCallback(this);
+        if (!mIntialized) {
+            mHolder = getHolder();
+            mHolder.setFormat(PixelFormat.TRANSPARENT);
+            mHolder.addCallback(this);
 
-        mArcPaint = new Paint();
+            mArcPaint = new Paint();
+            mArcRect = new RectF();
+
+            mRadiusDefault = Utils.dip2px(getContext(), 100);
+            mRadius = mRadiusDefault;
+            setOnTouchListener(this);
+
+            mIntialized = true;
+        }
+
         mArcPaint.setStyle(Paint.Style.FILL);
         mArcPaint.setAntiAlias(true);
-
-        arcRect = new RectF();
-
-        mRadius = Utils.dip2px(getContext(), 100);
     }
 
     @Override
@@ -149,22 +166,20 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback 
         float right = left + 2 * mRadius;
         float bottom = top + 2 * mRadius;
 
-        arcRect.set(left, top, right, bottom); // 饼图矩形位于父视图中间
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-//        draw();
+        mArcRect.set(left, top, right, bottom); // 饼图矩形位于父视图中间
     }
 
     private void drawCanvas(Canvas canvas) {
+        if (mScale != mScaleNew) {
+            mScale = mScaleNew;
+            mRadius = (float) (mRadiusDefault * mScale);
+        }
         drawDescription(canvas);
         drawArc(canvas);
     }
 
     private void drawArc(Canvas canvas) {
-        float drawArc = 360 * scale;
+        float drawArc = 360;
 
         for (int i = 0; i < mData.size(); i++) {
             // 画出每一部分对应的扇形
@@ -172,14 +187,14 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback 
                 continue;
             }
             mArcPaint.setColor(mData.get(i).color);
-            canvas.drawArc(arcRect, getRatioSum(i) * drawArc,
+            canvas.drawArc(mArcRect, getRatioSum(i) * drawArc,
                     (float) (mData.get(i).ratio * drawArc), true, mArcPaint);
         }
     }
 
     private void drawDescription(Canvas canvas) {
-        int circleCenterX = (int) ((arcRect.left + arcRect.right) / 2);
-        int circleCenterY = (int) ((arcRect.top + arcRect.bottom) / 2);
+        int circleCenterX = (int) ((mArcRect.left + mArcRect.right) / 2);
+        int circleCenterY = (int) ((mArcRect.top + mArcRect.bottom) / 2);
 
         for (int i = 0; i < mData.size(); i++) {
             if (mData.get(i).ratio == 0) {
@@ -312,7 +327,11 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback 
                 temp++;
             }
 
-            if (sALL_COLORS.get(key) == 0) {
+            if (key != null) {
+                Integer value = sALL_COLORS.get(key);
+                if (value == null || value != 0) {
+                    continue;
+                }
                 data.color = key;
                 sALL_COLORS.put(key, 1);
                 mColorUsed++;
@@ -357,6 +376,33 @@ public class PieChartView extends SurfaceView implements SurfaceHolder.Callback 
 
     public int getDataCount() {
         return mData == null ? 0 : mData.size();
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (event.getAction() & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_POINTER_DOWN:
+                mStartDistance = Utils.getDistance(event);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                double newDistance = Utils.getDistance(event);
+                if (mStartDistance > 0 && newDistance > 30) {
+                    mScaleNew = newDistance / mStartDistance;
+                    if (mScaleNew != mScale) {
+                        clearCanvas();
+                    }
+                }
+                break;
+        }
+        return true;
+    }
+
+    private void clearCanvas() {
+        if (Utils.isMainThread()) {
+            refreshLayout();
+        } else {
+            post(() -> refreshLayout());
+        }
     }
 
     public static class Data implements Parcelable {

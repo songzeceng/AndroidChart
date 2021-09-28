@@ -1,11 +1,12 @@
 package com.example.testapplication.utils;
 
 import android.content.Context;
+import android.graphics.Point;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 
 public class Utils {
     public static final int sINTERVAL_UPDATE_DATA = 1000;
-    public static final int sINTERVAL_UPDATE_PIE = 2 * sINTERVAL_UPDATE_DATA;
     public static int sINTERVAL_UPDATE_CHART = 16;
 
     public static final int sINIT_DATA_COUNT = 10;
@@ -64,5 +65,18 @@ public class Utils {
         }
 
         return (int) (1000 / windowManager.getDefaultDisplay().getRefreshRate());
+    }
+
+    public static double getDistance(MotionEvent event) {
+        if (event == null || event.getPointerCount() < 2) {
+            return -1;
+        }
+
+        return Math.sqrt(Math.pow(event.getX(0) - event.getX(1), 2)
+                + Math.pow(event.getY(0) - event.getY(1), 2));
+    }
+
+    public static boolean isMainThread() {
+        return Thread.currentThread().getName().equals("main");
     }
 }

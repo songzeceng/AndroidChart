@@ -8,8 +8,10 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,44 +24,44 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class BarChartView extends SurfaceView implements SurfaceHolder.Callback {
-    private int defaultLineColor = Color.parseColor("#FF4081");
-    private int defaultBorderColor = Color.parseColor("#BBBBBB");
-    private int titleTextColor = Color.argb(255, 217, 217, 217);
-    private int labelTextColor = Color.GRAY;
-    private int dataColor = Color.parseColor("#009688");
-    private int descriptionColor = defaultBorderColor;
+public class BarChartView extends SurfaceView implements SurfaceHolder.Callback, View.OnTouchListener {
+    private int mDefaultLineColor = Color.parseColor("#FF4081");
+    private int mDefaultBorderColor = Color.parseColor("#BBBBBB");
+    private int mTitleTextColor = Color.argb(255, 217, 217, 217);
+    private int mLabelTextColor = Color.GRAY;
+    private int mDataColor = Color.parseColor("#009688");
+    private int mDescriptionColor = mDefaultBorderColor;
     private int mTitleTextSize = 42;
     private int mLabelTextSize = 20;
-    private int descriptionTextSize = 20;
+    private int mDescriptionTextSize = 20;
     private int mWidth;
     private int mHeight;
-    private float perBarW = 30;
+    private float mPerBarW = 30;
     private int mLeftTextSpace = 80;
     private int mBottomTextSpace = 20;
     private int mTopTextSpace = 50;
-    private float scale = 0.5f;
+    private double mScale = 0.5f;
+    private double mScaleNew = 0.5f;
+    private double mStartDistance;
     protected Paint mBorderLinePaint;
     protected Paint mDataLinePaint;
-    private Double maxData;
-    private Double minData;
-    private int tablePadding;
+    private Double mMaxData;
+    private Double mMinData;
+    private int mTablePadding;
 
-    private List<Data> mDatas = new ArrayList<>();;
+    private List<Data> mDataList = new ArrayList<>();
     private SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
 
-    /**
-     * 备注文本画笔
-     */
     private Paint mTextPaint;
-    /**
-     * 标题文本画笔
-     */
     private Paint mTitleTextPaint;
 
-    private float dataTextSize = 20;
-    private int stepStart;
-    private int stepEnd;
+    private float mDataTextDefaultSize = 20;
+    private float mDataTextSize = mDataTextDefaultSize;
+    private float mDataTextMaxSize = 60;
+    private float mDataTextMinSize = 20;
+    private int mStepStart;
+    private int mStepEnd;
+    private boolean mInitialized = false;
 
     private boolean mRunning = true;
     private SurfaceHolder mHolder;
@@ -68,21 +70,9 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
         public void run() {
             try {
                 while (mRunning) {
-                    Canvas canvas;
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        canvas = mHolder.getSurface().lockHardwareCanvas();
-                    } else {
-                        canvas = mHolder.lockCanvas();
-                    }
-
+                    Canvas canvas = getCanvas();
                     drawCanvas(canvas);
-
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        mHolder.getSurface().unlockCanvasAndPost(canvas);
-                    } else {
-                        mHolder.unlockCanvasAndPost(canvas);
-                    }
-
+                    unlockCanvas(canvas);
                     Thread.sleep(Utils.sINTERVAL_UPDATE_CHART);
                 }
             } catch (Exception e) {
@@ -90,6 +80,24 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
             }
         }
     };
+
+    private void unlockCanvas(Canvas canvas) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mHolder.getSurface().unlockCanvasAndPost(canvas);
+        } else {
+            mHolder.unlockCanvasAndPost(canvas);
+        }
+    }
+
+    private Canvas getCanvas() {
+        Canvas canvas;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            canvas = mHolder.getSurface().lockHardwareCanvas();
+        } else {
+            canvas = mHolder.lockCanvas();
+        }
+        return canvas;
+    }
 
     public BarChartView(@NonNull Context context) {
         super(context);
@@ -115,7 +123,7 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int width = tablePadding + getTableEnd() + getPaddingLeft() + getPaddingRight();
+        int width = mTablePadding + getTableEnd() + getPaddingLeft() + getPaddingRight();
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
         if (MeasureSpec.EXACTLY == heightMode) {
@@ -132,35 +140,40 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
     }
 
     private int getTableEnd() {
-        return stepEnd + tablePadding;
+        return (int) ((mStepEnd + mTablePadding) * mScale);
     }
 
     private void init() {
         resetParam();
 
-        mHolder = getHolder();
-        mHolder.setFormat(PixelFormat.TRANSPARENT);
-        mHolder.addCallback(this);
+        if (!mInitialized) {
+            mHolder = getHolder();
+            mHolder.setFormat(PixelFormat.TRANSPARENT);
+            mHolder.addCallback(this);
 
-        mBorderLinePaint = generatePaint();
-        mBorderLinePaint.setColor(defaultBorderColor);
+            mBorderLinePaint = generatePaint();
+            mTextPaint = generatePaint();
+            mTitleTextPaint = generatePaint();
+            mDataLinePaint = new Paint();
+
+            mTablePadding = Utils.dip2px(getContext(), 10);
+            setOnTouchListener(this);
+            mInitialized = true;
+        }
+
+        mBorderLinePaint.setColor(mDefaultBorderColor);
         mBorderLinePaint.setStrokeWidth(Utils.dip2px(getContext(), 1));
 
-        mTextPaint = generatePaint();
-        mTextPaint.setColor(labelTextColor);
+        mTextPaint.setColor(mLabelTextColor);
         mTextPaint.setTextSize(mLabelTextSize);
 
-        mTitleTextPaint = generatePaint();
-        mTitleTextPaint.setColor(titleTextColor);
+        mTitleTextPaint.setColor(mTitleTextColor);
         mTitleTextPaint.setTextSize(mTitleTextSize);
 
-        mDataLinePaint = new Paint();
         mDataLinePaint.setAntiAlias(true);
-        mDataLinePaint.setColor(defaultLineColor);
+        mDataLinePaint.setColor(mDefaultLineColor);
         mDataLinePaint.setStyle(Paint.Style.FILL);
-        mDataLinePaint.setStrokeWidth(perBarW);
-
-        tablePadding = Utils.dip2px(getContext(), 10);
+        mDataLinePaint.setStrokeWidth((float) (mPerBarW * mScale));
     }
 
     private Paint generatePaint() {
@@ -171,63 +184,69 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
     }
 
     private void updateMaxMinData() {
-        maxData = -1d;
-        minData = Double.MAX_VALUE;
+        mMaxData = -1d;
+        mMinData = Double.MAX_VALUE;
 
-        for (Data data : mDatas) {
-            if (data.value > maxData) {
-                maxData = data.value;
+        for (Data data : mDataList) {
+            if (data.value > mMaxData) {
+                mMaxData = data.value;
             }
 
-            if (data.value < minData) {
-                minData = data.value;
+            if (data.value < mMinData) {
+                mMinData = data.value;
             }
         }
     }
 
     private void drawCanvas(Canvas canvas) {
-        double max = Math.ceil(maxData);
-        double min = Math.floor(minData);
-        double totalDiff = maxData - minData;
+        if (mScaleNew != mScale) {
+            clearCanvas();
+            mScale = mScaleNew;
+            mDataTextSize = (float) (mDataTextDefaultSize * mScale);
+            mDataTextSize = mDataTextSize > mDataTextMaxSize ? mDataTextMaxSize : Math.max(mDataTextSize, mDataTextMinSize);
+        }
+        double max = Math.ceil(mMaxData);
+        double min = Math.floor(mMinData);
+        double totalDiff = mMaxData - mMinData;
         float minHeight = Utils.dip2px(getContext(), 5);
         float totalHeight = mHeight + mBottomTextSpace + mTopTextSpace + minHeight;
 
         canvas.translate(mLeftTextSpace, mHeight - mBottomTextSpace);
 
-        canvas.drawLine(0, 0, 0, -totalHeight * scale, mBorderLinePaint);
+        canvas.drawLine(0, 0, 0, (float) (-totalHeight * mScale), mBorderLinePaint);
 
         canvas.drawText(String.format(Locale.CHINA, "%.1f", (max + min) / 2),
-                -mLeftTextSpace / 2f - mTextPaint.measureText(String.valueOf(Math.ceil((max + min) / 2))) / 2,
-                -totalHeight / 2 * scale,
+                (float) (-mLeftTextSpace / 2f - mTextPaint.measureText(String.valueOf(Math.ceil((max + min) / 2))) / 2 * mScale),
+                (float) (-totalHeight / 2 * mScale),
                 mTextPaint);
 
         canvas.drawText(String.format(Locale.CHINA, "%.1f", Math.ceil(max * 1.05)),
-                -mLeftTextSpace / 2f - mTextPaint.measureText(String.valueOf(max)) / 2,
-                -totalHeight * scale,
+                (float) (-mLeftTextSpace / 2f - mTextPaint.measureText(String.valueOf(max)) / 2 * mScale),
+                (float) (-totalHeight * mScale),
                 mTextPaint);
 
         canvas.drawLine(0, 0, getTableEnd(), 0, mBorderLinePaint);
-        for (int i = 0; i < mDatas.size(); i++) {
-            Data data = mDatas.get(i);
+        for (int i = 0; i < mDataList.size(); i++) {
+            Data data = mDataList.get(i);
             String perData = String.format(Locale.CHINA, "%.2f", data.value);
 
-            double currentDiff = data.value - minData;
-            float x = 3f * (i + 1) * perBarW;
-            float y = data.value - minData > 1e-5 ? (float) (totalHeight * scale / totalDiff * currentDiff) : minHeight;
-            canvas.drawLine(x, 0, x, -y, mDataLinePaint);
+            double currentDiff = data.value - mMinData;
+            float x = 3f * (i + 1) * mPerBarW;
+            float y = currentDiff > 1e-5 ? (float) (totalHeight / totalDiff * currentDiff) : minHeight;
+            canvas.drawLine((float) (x * mScale), 0, (float) (x * mScale), (float) (-y * mScale), mDataLinePaint);
 
-            mTextPaint.setTextSize(dataTextSize);
-            mTextPaint.setColor(dataColor);
+            mTextPaint.setTextSize(mDataTextSize);
+            mTextPaint.setColor(mDataColor);
             canvas.drawText(perData,
-                    x - mTextPaint.measureText(perData) / 2,
-                    -y - dataTextSize,
+                    (float) ((x - mTextPaint.measureText(perData) / 2) * mScale),
+                    (float) ((-y - mDataTextSize) * mScale),
                     mTextPaint);
 
-            mTextPaint.setTextSize(descriptionTextSize);
-            mTextPaint.setColor(descriptionColor);
+            mTextPaint.setTextSize(mDescriptionTextSize);
+            mTextPaint.setColor(mDescriptionColor);
             canvas.drawText(mSimpleDateFormat.format(data.time),
-                    x - mTextPaint.measureText(mSimpleDateFormat.format(data.time)) / 2,
-                    descriptionTextSize,
+                    (float) ((x - mTextPaint.measureText(mSimpleDateFormat.format(data.time)) / 2) * mScale),
+                    mDescriptionTextSize,
                     mTextPaint);
         }
     }
@@ -243,8 +262,8 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
             mDataLinePaint.reset();
         }
 
-        stepStart = tablePadding * 2;
-        stepEnd = (int) (stepStart + 3 * perBarW * (mDatas == null || mDatas.isEmpty() ? 0 : mDatas.size()));
+        mStepStart = mTablePadding * 2;
+        mStepEnd = (int) (mStepStart + 3 * mPerBarW * (mDataList == null || mDataList.isEmpty() ? 0 : (mDataList.size() + 1)));
     }
 
     private void refreshLayout() {
@@ -254,14 +273,14 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
     }
 
     public void setData(List<Data> datas) {
-        mDatas.clear();
-        mDatas.addAll(datas);
+        mDataList.clear();
+        mDataList.addAll(datas);
         updateMaxMinData();
         refreshLayout();
     }
 
     public void appendData(Data data) {
-        mDatas.add(data);
+        mDataList.add(data);
         updateMaxMinData();
         refreshLayout();
     }
@@ -283,7 +302,31 @@ public class BarChartView extends SurfaceView implements SurfaceHolder.Callback 
     }
 
     public int getDataCount() {
-        return mDatas == null ? 0 : mDatas.size();
+        return mDataList == null ? 0 : mDataList.size();
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (event.getAction() & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_POINTER_DOWN:
+                mStartDistance = Utils.getDistance(event);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                double newDistance = Utils.getDistance(event);
+                if (mStartDistance > 0 && newDistance > 30) {
+                    mScaleNew = newDistance / mStartDistance;
+                }
+                break;
+        }
+        return true;
+    }
+
+    private void clearCanvas() {
+        if (Utils.isMainThread()) {
+            refreshLayout();
+        } else {
+            post(() -> refreshLayout());
+        }
     }
 
     public static class Data {

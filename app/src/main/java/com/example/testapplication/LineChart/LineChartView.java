@@ -8,7 +8,10 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -25,62 +28,56 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Created by jeanboy on 2017/6/12.
- */
+public class LineChartView extends SurfaceView implements SurfaceHolder.Callback, View.OnTouchListener {
 
-public class LineChartView extends SurfaceView implements SurfaceHolder.Callback {
-
-    private Paint linePaint;//曲线画笔
-    private Paint pointPaint;//曲线上锚点画笔
-    private Paint tablePaint;//表格画笔
-    private Paint textRulerPaint;//标尺文本画笔
-    private Paint textPointPaint;//曲线上锚点文本画笔
+    private Paint mLinePaint; // 曲线画笔
+    private Paint mPointPaint; // 曲线上锚点画笔
+    private Paint mTablePaint; // 表格画笔
+    private Paint mTextRulerPaint; // 标尺文本画笔
+    private Paint mTextPointPaint; // 曲线上锚点文本画笔
     private Canvas mCanvas;
 
-    private Path linePath;//曲线路径
-    private Path tablePath;//表格路径
+    private Path mLinePath; // 曲线路径
+    private Path mTablePath; // 表格路径
 
     private int mWidth, mHeight;
 
-    private List<Data> dataList = new ArrayList<>();
+    private List<Data> mDataList = new ArrayList<>();
 
-    private Point[] linePoints;
-    private int stepStart;
-    private int stepEnd;
-    private int stepSpace;
-    private int stepSpaceDefault = 40;
-    private int stepSpaceDP = stepSpaceDefault;//item宽度默认dp
-    private int topSpace, bottomSpace;
-    private int tablePadding;
-    private int tablePaddingDP = 30;//view四周padding默认dp
+    private Point[] mLinePoints;
+    private int mStepStart;
+    private int mStepEnd;
+    private int mStepSpace;
+    private int mStepSpaceDefault = 40;
+    private int mStepSpaceDP = mStepSpaceDefault; // item宽度默认dp
+    private int mTopSpace, mBottomSpace;
+    private int mTablePadding;
+    private int mTablePaddingDP = 30; // view四周padding默认dp
 
-    private double maxValue, minValue;
-    private double rulerValueDefault = 10;
-    private double rulerValue = rulerValueDefault;//刻度单位跨度
-    private int rulerValuePadding;//刻度单位与轴的间距
-    private int rulerValuePaddingDP = 8;//刻度单位与轴的间距默认dp
-    private float heightPercent = 0.618f;
+    private double mMaxValue, mMinValue;
+    private double mRulerValueDefault = 10;
+    private double mRulerValue = mRulerValueDefault; // 刻度单位跨度
+    private int mRulerValuePadding; // 刻度单位与轴的间距
+    private int mRulerValuePaddingDP = 8; // 刻度单位与轴的间距默认dp
+    private float mHeightPercent = 0.618f;
 
-    private int lineColor = Color.parseColor("#286DD4");//曲线颜色
-    private float lineWidthDP = 2f;//曲线宽度dp
+    private int mLineColor = Color.parseColor("#286DD4"); // 曲线颜色
+    private float mLineWidthDP = 2f; // 曲线宽度dp
 
-    private int pointColor = Color.parseColor("#FF4081");//锚点颜色
-    private float pointWidthDefault = 8f;
-    private float pointWidthDP = pointWidthDefault;//锚点宽度dp
+    private int mPointColor = Color.parseColor("#FF4081"); // 锚点颜色
+    private float mPointWidthDefault = 8f;
+    private float mPointWidthDP = mPointWidthDefault; // 锚点宽度dp
 
-    private int tableColor = Color.parseColor("#BBBBBB");//表格线颜色
-    private float tableWidthDP = 0.5f;//表格线宽度dp
+    private int mTableColor = Color.parseColor("#BBBBBB"); // 表格线颜色
+    private float mTableWidthDP = 0.5f; // 表格线宽度dp
 
-    private int rulerTextColor = tableColor;//表格标尺文本颜色
-    private float rulerTextSizeSP = 10f;//表格标尺文本大小
+    private int mRulerTextColor = mTableColor; // 表格标尺文本颜色
+    private float mRulerTextSizeSP = 10f; // 表格标尺文本大小
 
-    private int pointTextColor = Color.parseColor("#009688");//锚点文本颜色
-    private float pointTextSizeSP = 10f;//锚点文本大小
+    private int mPointTextColor = Color.parseColor("#009688"); // 锚点文本颜色
+    private float mPointTextSizeSP = 10f; // 锚点文本大小
 
-    private boolean isBezierLine = false;
-    private boolean isCubePoint = false;
-    private boolean isInitialized = false;
+    private boolean mIsInitialized = false;
 
     private boolean mRunning = true;
     private SurfaceHolder mHolder;
@@ -90,27 +87,9 @@ public class LineChartView extends SurfaceView implements SurfaceHolder.Callback
         public void run() {
             try {
                 while (mRunning) {
-                    Canvas canvas;
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        canvas = mHolder.getSurface().lockHardwareCanvas();
-                    } else {
-                        canvas = mHolder.lockCanvas();
-                    }
-
-//                    if (bitmapCache == null) {
-//                        bitmapCache = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Bitmap.Config.ARGB_8888);
-//                    }
-//                    Canvas canvasCache = new Canvas(bitmapCache);
-
+                    Canvas canvas = getCanvas();
                     drawCanvas(canvas);
-
-//                    canvas.drawBitmap(bitmapCache, 0, 0, null);
-
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                        mHolder.getSurface().unlockCanvasAndPost(canvas);
-                    } else {
-                        mHolder.unlockCanvasAndPost(canvas);
-                    }
+                    unlockCanvas(canvas);
                     Thread.sleep(Utils.sINTERVAL_UPDATE_CHART);
                 }
             } catch (Exception e) {
@@ -118,6 +97,28 @@ public class LineChartView extends SurfaceView implements SurfaceHolder.Callback
             }
         }
     };
+
+    private void unlockCanvas(Canvas canvas) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            mHolder.getSurface().unlockCanvasAndPost(canvas);
+        } else {
+            mHolder.unlockCanvasAndPost(canvas);
+        }
+    }
+
+    private Canvas getCanvas() {
+        Canvas canvas;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            canvas = mHolder.getSurface().lockHardwareCanvas();
+        } else {
+            canvas = mHolder.lockCanvas();
+        }
+        return canvas;
+    }
+
+    private double mScale = 1f;
+    private double mScaleNew = 1f;
+    private double mStartDistance;
 
     public LineChartView(Context context) {
         this(context, null);
@@ -138,67 +139,69 @@ public class LineChartView extends SurfaceView implements SurfaceHolder.Callback
         mHolder.setFormat(PixelFormat.TRANSPARENT);
         mHolder.addCallback(this);
 
-        linePaint = new Paint();
-        linePaint.setAntiAlias(true);//抗锯齿
-        linePaint.setStyle(Paint.Style.STROKE);//STROKE描边FILL填充
-        linePaint.setColor(lineColor);
-        linePaint.setStrokeWidth(Utils.dip2px(getContext(), lineWidthDP));//边框宽度
+        mLinePaint = new Paint();
+        mLinePaint.setAntiAlias(true);
+        mLinePaint.setStyle(Paint.Style.STROKE);
+        mLinePaint.setColor(mLineColor);
+        mLinePaint.setStrokeWidth(Utils.dip2px(getContext(), mLineWidthDP));
 
-        pointPaint = new Paint();
-        pointPaint.setAntiAlias(true);
-        pointPaint.setStyle(Paint.Style.FILL);
-        pointPaint.setColor(pointColor);
-        pointPaint.setStrokeWidth(Utils.dip2px(getContext(), pointWidthDP));
+        mPointPaint = new Paint();
+        mPointPaint.setAntiAlias(true);
+        mPointPaint.setStyle(Paint.Style.FILL);
+        mPointPaint.setColor(mPointColor);
+        mPointPaint.setStrokeWidth(Utils.dip2px(getContext(), mPointWidthDP));
 
-        tablePaint = new Paint();
-        tablePaint.setAntiAlias(true);
-        tablePaint.setStyle(Paint.Style.STROKE);
-        tablePaint.setColor(tableColor);
-        tablePaint.setStrokeWidth(Utils.dip2px(getContext(), tableWidthDP));
+        mTablePaint = new Paint();
+        mTablePaint.setAntiAlias(true);
+        mTablePaint.setStyle(Paint.Style.STROKE);
+        mTablePaint.setColor(mTableColor);
+        mTablePaint.setStrokeWidth(Utils.dip2px(getContext(), mTableWidthDP));
 
-        textRulerPaint = new Paint();
-        textRulerPaint.setAntiAlias(true);
-        textRulerPaint.setStyle(Paint.Style.FILL);
-        textRulerPaint.setTextAlign(Paint.Align.CENTER);
-        textRulerPaint.setColor(rulerTextColor);//文本颜色
-        textRulerPaint.setTextSize(Utils.sp2px(getContext(), rulerTextSizeSP));//字体大小
+        mTextRulerPaint = new Paint();
+        mTextRulerPaint.setAntiAlias(true);
+        mTextRulerPaint.setStyle(Paint.Style.FILL);
+        mTextRulerPaint.setTextAlign(Paint.Align.CENTER);
+        mTextRulerPaint.setColor(mRulerTextColor);
+        mTextRulerPaint.setTextSize(Utils.sp2px(getContext(), mRulerTextSizeSP));
 
-        textPointPaint = new Paint();
-        textPointPaint.setAntiAlias(true);
-        textPointPaint.setStyle(Paint.Style.FILL);
-        textPointPaint.setTextAlign(Paint.Align.CENTER);
-        textPointPaint.setColor(pointTextColor);//文本颜色
-        textPointPaint.setTextSize(Utils.sp2px(getContext(), pointTextSizeSP));//字体大小
+        mTextPointPaint = new Paint();
+        mTextPointPaint.setAntiAlias(true);
+        mTextPointPaint.setStyle(Paint.Style.FILL);
+        mTextPointPaint.setTextAlign(Paint.Align.CENTER);
+        mTextPointPaint.setColor(mPointTextColor);
+        mTextPointPaint.setTextSize(Utils.sp2px(getContext(), mPointTextSizeSP));
 
-        linePath = new Path();
-        tablePath = new Path();
+        mLinePath = new Path();
+        mTablePath = new Path();
+
+        setOnTouchListener(this);
 
         resetParam();
     }
 
     private void resetParam() {
-        linePath.reset();
-        tablePath.reset();
-        stepSpace = Utils.dip2px(getContext(), stepSpaceDP);
-        tablePadding = Utils.dip2px(getContext(), tablePaddingDP);
-        rulerValuePadding = Utils.dip2px(getContext(), rulerValuePaddingDP);
-        stepStart = tablePadding * 2;
-        stepEnd = stepStart + stepSpace * (dataList.size() - 1);
-        topSpace = bottomSpace = tablePadding;
-        linePoints = new Point[dataList.size()];
+        mLinePath.reset();
+        mTablePath.reset();
+        mStepSpace = Utils.dip2px(getContext(), mStepSpaceDP);
+        mTablePadding = Utils.dip2px(getContext(), mTablePaddingDP);
+        mRulerValuePadding = Utils.dip2px(getContext(), mRulerValuePaddingDP);
+        mStepStart = mTablePadding * 2;
+        mStepEnd = mStepStart + mStepSpace * (mDataList.size() - 1);
+        mTopSpace = mBottomSpace = mTablePadding;
+        mLinePoints = new Point[mDataList.size()];
 
-        isInitialized = false;
+        mIsInitialized = false;
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width = tablePadding + getTableEnd() + getPaddingLeft() + getPaddingRight();//计算自己的宽度
+        int width = mTablePadding + getTableEnd() + getPaddingLeft() + getPaddingRight(); // 计算自己的宽度
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);//父类期望的高度
+        int height = MeasureSpec.getSize(heightMeasureSpec); // 父类期望的高度
         if (MeasureSpec.EXACTLY == heightMode) {
             height = getPaddingTop() + getPaddingBottom() + height;
         }
-        setMeasuredDimension(width, height);//设置自己的宽度和高度
+        setMeasuredDimension(width, height); // 设置自己的宽度和高度
     }
 
     @Override
@@ -214,137 +217,110 @@ public class LineChartView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     private void drawCanvas(Canvas canvas) {
-        canvas.drawColor(Color.TRANSPARENT);//绘制背景颜色
-        canvas.translate(0f, mHeight / 2f + (getViewDrawHeight() + topSpace + bottomSpace) / 2f);//设置画布中心点垂直居中
+        canvas.drawColor(Color.TRANSPARENT); // 绘制背景颜色
+        canvas.translate(0f, mHeight / 2f + (getViewDrawHeight() + mTopSpace + mBottomSpace) / 2f); // 设置画布中心点垂直居中
 
-        if (!isInitialized) {
+        if (mScaleNew != mScale) {
+            clearCanvas();
+            mScale = mScaleNew;
+//            mRulerValue = mRulerValue * mScale;
+            mStepStart = (int) (mStepStart * mScale);
+        }
+
+        if (!mIsInitialized) {
             setupLine();
         }
 
-        drawTable(canvas);//绘制表格
-        drawLine(canvas);//绘制曲线
-        drawLinePoints(canvas);//绘制曲线上的点
+        drawTable(canvas); // 绘制表格
+        drawLine(canvas); // 绘制曲线
+        drawLinePoints(canvas); // 绘制曲线上的点
     }
 
     private void drawText(Canvas canvas, Paint textPaint, String text, float x, float y) {
         canvas.drawText(text, x, y, textPaint);
     }
 
-    /**
-     * 绘制标尺y轴文本
-     *
-     * @param canvas
-     * @param text
-     * @param x
-     * @param y
-     */
     private void drawRulerYText(Canvas canvas, String text, float x, float y) {
-        textRulerPaint.setTextAlign(Paint.Align.RIGHT);
-        Paint.FontMetrics fontMetrics = textRulerPaint.getFontMetrics();
+        mTextRulerPaint.setTextAlign(Paint.Align.RIGHT);
+        Paint.FontMetrics fontMetrics = mTextRulerPaint.getFontMetrics();
         float fontTotalHeight = fontMetrics.bottom - fontMetrics.top;
         float offsetY = fontTotalHeight / 2 - fontMetrics.bottom;
-        float newY = y + offsetY;
-        float newX = x - rulerValuePadding;
-        drawText(canvas, textRulerPaint, text, newX, newY);
+        float newY = (float) (y + offsetY * mScale);
+        float newX = (float) (x - mRulerValuePadding * mScale);
+        drawText(canvas, mTextRulerPaint, text, newX, newY);
     }
 
-    /**
-     * 绘制标尺x轴文本
-     *
-     * @param canvas
-     * @param text
-     * @param x
-     * @param y
-     */
     private void drawRulerXText(Canvas canvas, String text, float x, float y) {
-        textRulerPaint.setTextAlign(Paint.Align.CENTER);
-        Paint.FontMetrics fontMetrics = textRulerPaint.getFontMetrics();
+        mTextRulerPaint.setTextAlign(Paint.Align.CENTER);
+        Paint.FontMetrics fontMetrics = mTextRulerPaint.getFontMetrics();
         float fontTotalHeight = fontMetrics.bottom - fontMetrics.top;
         float offsetY = fontTotalHeight / 2 - fontMetrics.bottom;
-        float newY = y + offsetY + rulerValuePadding;
-        drawText(canvas, textRulerPaint, text, x, newY);
+        float newY = (float) (y + offsetY * mScale + mRulerValuePadding * mScale);
+        drawText(canvas, mTextRulerPaint, text, x, newY);
     }
 
-    /**
-     * 绘制曲线上锚点文本
-     *
-     * @param canvas
-     * @param text
-     * @param x
-     * @param y
-     */
     private void drawLinePointText(Canvas canvas, String text, float x, float y) {
-        textPointPaint.setTextAlign(Paint.Align.CENTER);
-        float newY = y - rulerValuePadding;
-        drawText(canvas, textPointPaint, text, x, newY);
+        mTextPointPaint.setTextAlign(Paint.Align.CENTER);
+        float newY = y - mRulerValuePadding;
+        drawText(canvas, mTextPointPaint, text, x, newY);
     }
 
     private int getTableStart() {
-        return stepStart + tablePadding;
+        return (int) ((mStepStart + mTablePadding) * mScale);
     }
 
     private int getTableEnd() {
-        return stepEnd + tablePadding;
+        return (int) ((mStepEnd + mTablePadding) * mScale);
     }
 
     private int mPaddingBottom = 150;
 
-    /**
-     * 绘制背景表格
-     *
-     * @param canvas
-     */
     private void drawTable(Canvas canvas) {
         int tableEnd = getTableEnd();
 
-        double startValue = minValue - (minValue > 0 ? 0 : minValue % rulerValue);
-        double endValue = maxValue + rulerValue;
+        double startValue = mMinValue - (mMinValue > 0 ? 0 : mMinValue % mRulerValue);
+        double endValue = mMaxValue + mRulerValue;
 
         int startHeight;
-        //标尺y轴连接线
+        // 标尺y轴连接线
         do {
             startHeight = -getValueHeight(startValue);
-            tablePath.moveTo(stepStart, startHeight);
-            tablePath.lineTo(tableEnd, startHeight);
-            //绘制y轴刻度单位
-            drawRulerYText(canvas, String.format(Locale.CHINA, "%.2f", startValue), stepStart, startHeight);
-            startValue += rulerValue;
+            mTablePath.moveTo(mStepStart, startHeight);
+            mTablePath.lineTo(tableEnd, startHeight);
+            // 绘制y轴刻度单位
+            drawRulerYText(canvas, String.format(Locale.CHINA, "%.2f", startValue), mStepStart, startHeight);
+            startValue += mRulerValue * mScale;
         } while (startValue < endValue);
 
-        tablePath.moveTo(stepStart, startHeight);//加上顶部的间隔
-        tablePath.lineTo(stepStart, mPaddingBottom);//标尺y轴
-        tablePath.lineTo(tableEnd, mPaddingBottom);//标尺x轴
+        mTablePath.moveTo(mStepStart, startHeight); // 加上顶部的间隔
+        mTablePath.lineTo(mStepStart, (float) (mPaddingBottom * mScale)); // 标尺y轴
+        mTablePath.lineTo(tableEnd, (float) (mPaddingBottom * mScale)); // 标尺x轴
 
-        canvas.drawPath(tablePath, tablePaint);
-        //绘制x轴刻度单位
+        canvas.drawPath(mTablePath, mTablePaint);
+        // 绘制x轴刻度单位
         drawRulerXValue(canvas);
     }
 
-    /**
-     * 绘制标尺x轴上所有文本
-     *
-     * @param canvas
-     */
     private void drawRulerXValue(Canvas canvas) {
-        if (linePoints == null) return;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+        if (mLinePoints == null) return;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
         Date lastAnchorDate = null;
-        for (int i = 0; i < linePoints.length; i++) {
+        for (int i = 0; i < mLinePoints.length; i++) {
             try {
-                Date time = dataList.get(i).time;
+                Date time = mDataList.get(i).time;
                 if (i == 0) {
                     lastAnchorDate = time;
                 }
-                Point point = linePoints[i];
+                Point point = mLinePoints[i];
                 if (point == null) break;
 
                 if (i == 0 ) {
-                    drawRulerXText(canvas, dateFormat.format(time), point.x, mPaddingBottom);
+                    drawRulerXText(canvas, dateFormat.format(time), point.x, (float) (mPaddingBottom * mScale));
                 } else {
                     if (time != null && lastAnchorDate != null) {
                         if (time.getTime() - lastAnchorDate.getTime() > 1000 * 5) {
                             lastAnchorDate = time;
-                            drawRulerXText(canvas, dateFormat.format(time), point.x, mPaddingBottom);
+                            drawRulerXText(canvas, dateFormat.format(time), point.x, (float) (mPaddingBottom * mScale));
                         }
                     }
                 }
@@ -354,110 +330,67 @@ public class LineChartView extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
-    /**
-     * 绘制曲线
-     *
-     * @param canvas
-     */
     private void drawLine(Canvas canvas) {
-        canvas.drawPath(linePath, linePaint);
+        canvas.drawPath(mLinePath, mLinePaint);
     }
 
-    /**
-     * 绘制曲线上的锚点
-     *
-     * @param canvas
-     */
     private void drawLinePoints(Canvas canvas) {
-        if (linePoints == null) return;
+        if (mLinePoints == null) return;
 
-        float pointWidth = Utils.dip2px(getContext(), pointWidthDP) / 2f;
-        int pointCount = linePoints.length;
+        float pointWidth = Utils.dip2px(getContext(), mPointWidthDP) / 2f;
+        int pointCount = mLinePoints.length;
 
         for (int i = 0; i < pointCount; i++) {
-            Point point = linePoints[i];
+            Point point = mLinePoints[i];
             if (point == null) break;
-            if (isCubePoint) {
-                canvas.drawPoint(point.x, point.y, pointPaint);
-            } else {
-                canvas.drawCircle(point.x, point.y, pointWidth, pointPaint);
-            }
-            //绘制点的文本
-            String text = String.format(Locale.CHINA, "%.2f", dataList.get(i).getValue());
 
+            canvas.drawCircle(point.x, point.y, pointWidth, mPointPaint);
+            // 绘制点的文本
+            String text = String.format(Locale.CHINA, "%.2f", mDataList.get(i).getValue());
             drawLinePointText(canvas, text, point.x, point.y);
         }
     }
 
-    /**
-     * 获取value值所占的view高度
-     *
-     * @param value
-     * @return
-     */
     private int getValueHeight(double value) {
         value = round(value, 2);
-        double valuePercent = Math.abs(value - minValue) * 100f / (Math.abs(maxValue - minValue) * 100f);//计算value所占百分比
-        return (int) (getViewDrawHeight() * valuePercent + bottomSpace - mPaddingBottom);//底部加上间隔
+        double valuePercent = Math.abs(value - mMinValue) * 100f / (Math.abs(mMaxValue - mMinValue) * 100f); // 计算value所占百分比
+        return (int) ((getViewDrawHeight() * valuePercent + mBottomSpace - mPaddingBottom) * mScale); // 底部加上间隔
     }
 
-    /**
-     * 获取绘制区域高度
-     *
-     * @return
-     */
     private float getViewDrawHeight() {
-        return getMeasuredHeight() * heightPercent;
+        return getMeasuredHeight() * mHeightPercent;
     }
 
-    /**
-     * 初始化曲线数据
-     */
     private void setupLine() {
-        if (dataList.isEmpty()) return;
+        if (mDataList.isEmpty()) return;
 
         int stepTemp = getTableStart();
-        Point pre = new Point();
-        Data data = dataList.get(0);
+        Point point = new Point();
+        Data data = mDataList.get(0);
 
         double value = (Double) data.getValue();
 
-        pre.set(stepTemp, -getValueHeight(value));//坐标系从0,0默认在第四象限绘制
-        linePoints[0] = pre;
-        linePath.moveTo(pre.x, pre.y);
+        point.set(stepTemp, -getValueHeight(value)); // 坐标系从0,0默认在第四象限绘制
+        mLinePoints[0] = point;
+        mLinePath.moveTo(point.x, point.y);
 
-        if (dataList.size() == 1) {
-            isInitialized = true;
+        if (mDataList.size() == 1) {
+            mIsInitialized = true;
             return;
         }
 
-        for (int i = 1; i < dataList.size(); i++) {
-            data = dataList.get(i);
-            Point next = new Point();
-
+        for (int i = 1; i < mDataList.size(); i++) {
+            data = mDataList.get(i);
             value = (Double) data.getValue();
 
-            next.set(stepTemp += stepSpace, -getValueHeight(value));
+            point = new Point();
+            point.set(stepTemp += mStepSpace * mScale, -getValueHeight(value));
+            mLinePath.lineTo(point.x, point.y);
 
-            if (isBezierLine) {
-                int cW = pre.x + stepSpace / 2;
-
-                Point p1 = new Point();//控制点1
-                p1.set(cW, pre.y);
-
-                Point p2 = new Point();//控制点2
-                p2.set(cW, next.y);
-
-                linePath.cubicTo(p1.x, p1.y, p2.x, p2.y, next.x, next.y);//创建三阶贝塞尔曲线
-            } else {
-                linePath.lineTo(next.x, next.y);
-            }
-
-            pre = next;
-            linePoints[i] = next;
+            mLinePoints[i] = point;
         }
 
-        isInitialized = true;
+        mIsInitialized = true;
     }
 
     private void refreshLayout() {
@@ -472,16 +405,14 @@ public class LineChartView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     private void updateMaxMin() {
-        maxValue = Collections.max(this.dataList, (Comparator<Data>) (o1, o2) -> {
+        mMaxValue = Collections.max(this.mDataList, (o1, o2) -> {
             double compare = o1.getValue() - o2.getValue();
-
             return compare == 0 ? 0 : (compare > 0 ? 1 : -1);
         }).getValue();
 
 
-        minValue = Collections.min(this.dataList, (Comparator<Data>) (o1, o2) -> {
+        mMinValue = Collections.min(this.mDataList, (o1, o2) -> {
             double compare = o1.getValue() - o2.getValue();
-
             return compare == 0 ? 0 : (compare > 0 ? 1 : -1);
         }).getValue();
     }
@@ -489,16 +420,11 @@ public class LineChartView extends SurfaceView implements SurfaceHolder.Callback
     /*-------------可操作方法---------------*/
 
     public void setData(List<Data> dataList) {
-        if (dataList == null) {
-            throw new RuntimeException("dataList cannot is null!");
-        }
-        if (dataList.isEmpty()) return;
+        if (dataList == null || dataList.isEmpty()) return;
 
-        this.dataList.clear();
-        this.dataList.addAll(dataList);
-
+        mDataList.clear();
+        mDataList.addAll(dataList);
         updateMaxMin();
-
         refreshLayout();
     }
 
@@ -507,27 +433,20 @@ public class LineChartView extends SurfaceView implements SurfaceHolder.Callback
             return;
         }
 
-        if (dataList == null) {
-            dataList = new ArrayList<>();
+        if (mDataList == null) {
+            mDataList = new ArrayList<>();
         }
 
-        dataList.add(data);
-
+        mDataList.add(data);
         updateMaxMin();
-
-        refreshLayout();
-    }
-
-    public void setBezierLine(boolean isBezier) {
-        isBezierLine = isBezier;
         refreshLayout();
     }
 
     public void setRulerYSpace(double space) {
         if (space <= 0) {
-            space = rulerValueDefault;
+            space = mRulerValueDefault;
         }
-        rulerValue = space;
+        mRulerValue = space;
         refreshLayout();
     }
 
@@ -548,7 +467,31 @@ public class LineChartView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public int getDataCount() {
-        return dataList == null ? 0 : dataList.size();
+        return mDataList == null ? 0 : mDataList.size();
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (event.getAction() & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_POINTER_DOWN:
+                mStartDistance = Utils.getDistance(event);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                double newDistance = Utils.getDistance(event);
+                if (mStartDistance > 0 && newDistance > 10) {
+                    mScaleNew = newDistance / mStartDistance;
+                }
+                break;
+        }
+        return true;
+    }
+
+    private void clearCanvas() {
+        if (Utils.isMainThread()) {
+            refreshLayout();
+        } else {
+            post(() -> refreshLayout());
+        }
     }
 
     public static class Data {
